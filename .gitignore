@@ -208,3 +208,6 @@ __marimo__/
 
 #Secretsfil
 secrets.env
+
+#Publika ssh-nyckeln för vagrant
+ansible_id_ed25519.pub
