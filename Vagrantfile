@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
       apt-get install -y ansible git
 
       #Klona repot till "/home/vagrant/"
-      git clone https://TofflanSec:#{secrets["GITHUB_TOKEN"]}@github.com/TofflanSec/J-H-VIR-projekt.git /home/vagrant/ansible
+      git clone https://TofflanSec:#{secrets["GITHUB_TOKEN"]}@github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git /home/vagrant/ansible
       chown -R vagrant:vagrant /home/vagrant/ansible
       chmod 755 /home/vagrant/ansible
 
