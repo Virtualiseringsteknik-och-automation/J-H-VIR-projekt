@@ -22,9 +22,9 @@ Vagrant.configure("2") do |config|
     db.vm.provider "virtualbox" do |vb|
       #Tilldelar internt namn i VM
       vb.name = "database"
-      #Anger hur myckket ramminne VM får anävnda från värdmaskinen.
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
       vb.memory = VM_MEMORY
-      #Anger hur myckket CPU VM får anävnda från värdmaskinen.
+      #Anger hur myckket CPU VM får använda från värdmaskinen.
       vb.cpus = VM_CPUS
     end
     
@@ -64,6 +64,107 @@ Vagrant.configure("2") do |config|
       chown -R vagrant:vagrant /home/vagrant/.ssh
 
       echo ===db klar===
+    SHELL
+  end
+  #==========Lastbalanseraren==========(Definierar en ny VM.)
+  config.vm.define "lb" do |lb|
+    #Tilldelar ett namn till vm i hostmaskinen.
+    lb.vm.hostname = "lb"
+    #Tilldelar en ipadress till VM i ett privat nätverk.
+    lb.vm.network "private_network", ip: LOADBALANCER_IP
+    #Anger att VM ska använda portforward för att kunna prata med värdmaskinen.
+    lb.vm.network "forwarded_port", guest: 80, host: 8080
+    #Anger vilket värdprogrram som ska köra VM.
+    lb.vm.provider "virtualbox" do |vb|
+      #Tilldelar internt namn i VM
+      vb.name = "loadbalancer"
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.memory = VM_MEMORY
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.cpus = VM_CPUS
+    end
+    lb.vm.provision "shell", inline: <<-SHELL
+      #Uppdatera ubuntu
+      apt-get update -y
+
+      #Skapar mappen ".ssh" i användarmappen "vagrant"
+      mkdir -p /home/vagrant/.ssh
+
+      #Kopierar in den publika ssh-nyckeln till listan med auktoriserade ssh-nycklar
+      cat /vagrant/ansible_id_ed25519.pub \
+        >> /home/vagrant/.ssh/authorized_keys
+
+      #Ändrar rättigheter på .ssh-mappen
+      chmod 700 /home/vagrant/.ssh
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      chown -R vagrant:vagrant /home/vagrant/.ssh
+    echo ===lb klar===
+    SHELL
+  end
+
+#==========Webserver1==========
+  config.vm.define "web1" do |web1|
+    #Tilldelar ett namn till vm i hostmaskinen.
+    web1.vm.hostname = "web1"
+    #Tilldelar en ipadress till VM i ett privat nätverk.
+    web1.vm.network "private_network", ip: WEBSERVER1_IP
+    #Anger vilket värdprogrram som ska köra VM.
+    web1.vm.provider "virtualbox" do |vb|
+      #Tilldelar internt namn i VM
+      vb.name = "webserver1"
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.memory = VM_MEMORY
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.cpus = VM_CPUS
+    end
+    web1.vm.provision "shell", inline: <<-SHELL
+      #Uppdatera ubuntu
+      apt-get update -y      
+      #Skapar mappen ".ssh" i användarmappen "vagrant"
+      mkdir -p /home/vagrant/.ssh
+
+      #Kopierar in den publika ssh-nyckeln till listan med auktoriserade ssh-nycklar
+      cat /vagrant/ansible_id_ed25519.pub \
+        >> /home/vagrant/.ssh/authorized_keys
+
+      #Ändrar rättigheter på .ssh-mappen
+      chmod 700 /home/vagrant/.ssh
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      chown -R vagrant:vagrant /home/vagrant/.ssh
+    echo ===web1 klar===
+    SHELL
+  end
+
+#==========Webserver2==========
+  config.vm.define "web2" do |web2|
+    #Tilldelar ett namn till vm i hostmaskinen.
+    web2.vm.hostname = "web2"
+    #Tilldelar en ipadress till VM i ett privat nätverk.
+    web2.vm.network "private_network", ip: WEBSERVER2_IP
+    #Anger vilket värdprogrram som ska köra VM.
+    web2.vm.provider "virtualbox" do |vb|
+      #Tilldelar internt namn i VM
+      vb.name = "webserver2"
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.memory = VM_MEMORY
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.cpus = VM_CPUS
+    end
+    web2.vm.provision "shell", inline: <<-SHELL
+      #Uppdatera ubuntu
+      apt-get update -y      
+      #Skapar mappen ".ssh" i användarmappen "vagrant"
+      mkdir -p /home/vagrant/.ssh
+
+      #Kopierar in den publika ssh-nyckeln till listan med auktoriserade ssh-nycklar
+      cat /vagrant/ansible_id_ed25519.pub \
+        >> /home/vagrant/.ssh/authorized_keys
+
+      #Ändrar rättigheter på .ssh-mappen
+      chmod 700 /home/vagrant/.ssh
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      chown -R vagrant:vagrant /home/vagrant/.ssh
+    echo ===web2 klar===
     SHELL
   end
 end
