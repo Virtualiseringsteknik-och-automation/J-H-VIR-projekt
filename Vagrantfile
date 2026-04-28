@@ -3,13 +3,15 @@
 
 Vagrant.configure("2") do |config|
   
+  #Variabler för VMarnas IPv4-adresser
   LOADBALANCER_IP ="192.168.56.10"
   WEBSERVER1_IP ="192.168.56.11"
   WEBSERVER2_IP ="192.168.56.12"
   DATABASE_IP ="192.168.56.13"
-
+  #Variabler för VMarnas prestanda
   VM_MEMORY ="512"
   VM_CPUS ="1"
+  
   config.vm.box = "ubuntu/jammy64"
 
   #==========Database========== (Definierar en ny VM. Databasen kommer även att aggera ansible kontrollnod.)
