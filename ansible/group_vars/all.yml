@@ -1,0 +1,14 @@
+Databases IP-adress
+Databasname, vagrant, vagrant
+webservers IP-adress
+
+db_ip: "192.168.56.10"
+db_name: "db"
+db_user: "vagrant"
+db_password: "vagrant"
+
+webservers:
+  - name: "web1"
+    ip: "192.168.56.11"
+  - name: "web2"
+    ip: "192.168.56.12"
