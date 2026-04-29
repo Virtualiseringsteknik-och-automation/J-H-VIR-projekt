@@ -1,12 +1,15 @@
-Databases IP-adress
-Databasname, vagrant, vagrant
-webservers IP-adress
 
-db_ip: "192.168.56.10"
+# här läger vi alla variabler som är gemensamma för samtliga hostar
+
+# variabler för databasen som används för att ansluta till databasen
+db_ip: "192.168.56.13"
 db_name: "db"
 db_user: "vagrant"
 db_password: "vagrant"
 
+#här är en YAMl lista över alla webservers som vi har i vår infrastruktur.
+# detta är ett kraftfullt då vi kan skapa loopar som kan lägga till flera webservers,
+# utan att behöva ändra i playbooken.
 webservers:
   - name: "web1"
     ip: "192.168.56.11"
