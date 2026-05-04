@@ -1,0 +1,26 @@
+upstream backend {
+    #Ansible loopar automatiskt igenom alla servrar i gruppen [webservers] från inventoryfilen.
+{% for hosts in groups['webservers'] %}
+    server {{hostvars[hosts]['ansible_hosts']}}:80;
+{% endfor %}
+}
+
+server {
+    #Definierar vilken port Nginx ska lyssna på. Port 80 i det här fallet vilket är vanlig HTTP-trafik
+    listen 80;
+    #Understräck betyder att den tar emot alla requests oavsett domännamn.
+    server_name _;
+
+    #"location /" betyder att oavsett vart trafiken kommer ifrån så ska den hanteras i detta scope.
+    location / {
+        #Detta är själva lastbalanseringen. Här konfigureras Nginx hur den ska hantera inkommande trafik. inkommande trafik dirigeras till 
+        #"backend" som initierats och definierats i början av detta dokument. (Alltås till en av mina webservrar)
+        proxy_pass http://backend;
+
+        #Skickar med rätt headers så att webbservern vet vad som hänt. Annars förloras viktig information på vägen om den ursprungliga trafiken.
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+}
