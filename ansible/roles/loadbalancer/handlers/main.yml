@@ -1,17 +1,4 @@
----
-#Dessa kommandon körs som vanliga tasks men enbart om de triggas av "notify". 
-
-#Stoppar och startar om Nginx helt (Kortare avbrott)
-- name: Restart Nginx
-  service: 
-    name: nginx
+- name: Starta om PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
     state: restarted
-
-#Laddar om konfigurationen utan avbrott (Används i produktion)
-- name: Reload Nginx
-  service: 
-    name: nginx
-    state: reload
-
-
-#Tasks i denna fil körs alltid sist.
