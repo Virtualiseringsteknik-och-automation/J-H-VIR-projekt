@@ -16,7 +16,7 @@
 #Templeate kopieras till sites-available.
 - name: Kopiera lastbalanseringskonfigurationen från template
   template:
-    src: nginx_lb.conf.j2
+    src: loadbalancer.conf.j2
     dest: /etc/nginx//sites-available/loadbalancer.conf
   notify: Restart Nginx
 
