@@ -1,8 +1,8 @@
 ---
 #Installerar Nginx
-- name: Installera Nginx
+- name: Installera nginx
   apt:
-    name: Nginx
+    name: nginx
     state: present
     update_cache: yes
 
@@ -11,14 +11,14 @@
   file:
     path: /etc/nginx/sites-enabled/default
     state: absent
-  notify: Restart Nginx
+  notify: restart nginx
 
 #Templeate kopieras till sites-available.
 - name: Kopiera lastbalanseringskonfigurationen från template
   template:
     src: loadbalancer.conf.j2
-    dest: /etc/nginx//sites-available/loadbalancer.conf
-  notify: Restart Nginx
+    dest: /etc/nginx/sites-available/loadbalancer.conf
+  notify: restart nginx
 
 #En symbolisk länk skapas till konfigurationen så att nginx faktiskt läser lastbalanseringskonfigurationen.
 - name: Aktivera lastbalanseringskonfigurationen
@@ -26,7 +26,7 @@
     src: /etc/nginx/sites-available/loadbalancer.conf
     dest: /etc/nginx/sites-enabled/loadbalancer.conf
     state: link
-  notify: Restart Nginx
+  notify: restart nginx
 
 #Nginx startas och sätts till att startas automatiskt när VM startas om.
 - name: Säkerställ att Nginx är startad och aktiverad vid boot
