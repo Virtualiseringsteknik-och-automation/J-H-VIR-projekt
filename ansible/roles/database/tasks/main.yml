@@ -24,6 +24,7 @@
   community.postgresql.postgresql_db:
   # de lockiga paranteserna gör att vi kan referera till variablerna i group_vars/all.yml
     name: "{{ db_name }}"
+  become : yes
   # become_user: postgres gör att ansible kör det här steget som användaren postgres.
   #detta är viktigt eftersom att det är den användaren som har rätt till att skapa-
   # databaser i programmet
@@ -37,6 +38,7 @@
     name: "{{ db_user }}"
     password: "{{ db_password }}"
     priv: "ALL"
+  become: yes
   become_user: postgres
 
 # här ser vi till att PostgreSQL lyssnar på alla IP-adresser så att webservrarna kan prata
