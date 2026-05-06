@@ -20,11 +20,11 @@
   notify: Restart Apache
 
 - name: Aktivera webbserver-konfigurationen
-  command: a2ensite webserver.conf
+  command: a2ensite webbserver.conf
   notify: Restart Apache
 
 - name: Inaktivera default-sidan
-  command: a2adissite 000-default.conf
+  command: a2dissite 000-default.conf
   notify: Restart Apache
 
 - name: kopiera index.html från template
