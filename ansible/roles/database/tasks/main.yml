@@ -3,6 +3,8 @@
 - name: Installera PostgreSQL och nödvändigt Python-bibliotek
   ansible.builtin.apt:
     name:
+      # ACL installeras så att ansible kan ge rättigheter till PostgreSQL-filerna innan vi startar tjänsten.
+      - acl
       - postgresql
     # postgresql-contrib innehåller extra verktyg och funktioner som kan vara användbara
       - postgresql-contrib
@@ -52,7 +54,7 @@
   ansible.builtin.lineinfile:
     path: /etc/postgresql/14/main/pg_hba.conf
     # här säger vi att endast webservrarna i inventariet får prata med databasen
-    #de måste också använda scram-sha-256 som autentiseringsmetod
+    #de måste också använda scram-sha-256 som krypteringsmetod för att autentisera sig.
     line: "host    {{ db_name }}    {{ db_user }}    {{ hostvars[item]['ansible_host'] }}/32    scram-sha-256"
     state: present
   loop: "{{ groups['webservers'] }}"
