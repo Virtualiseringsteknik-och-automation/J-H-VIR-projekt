@@ -3,7 +3,7 @@
     ServerName {{ ansible_host }}
 
     {# Talar om för Apache2 vart hemsidan den ska serva finns. #}
-    <DocumentRoot /var/www/html>
+    DocumentRoot /var/www/html
 
     {# Ett block med regler för mappen /var/www/html #}
     <Directory /var/www/html>
@@ -12,7 +12,7 @@
         AllowOverride All
 
         {# Tillåter alla att komma åt och använda filerna i mappen. (Enbart för Apache internt. inte för vem som får nå servern utifrån.) #}
-        Required all granted
+        Require all granted
     </Directory>
 
     {# Tillåt bara trafik från lastbalanseraren till Apache2 #}
