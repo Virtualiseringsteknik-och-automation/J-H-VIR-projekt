@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+    {# Hämtar den aktuella webserverns IPv4-adress. #}
+    ServerName {{ ansible_host }}
+
+    {# Talar om för Apache2 vart hemsidan den ska serva finns. #}
+    <DocumentRoot /var/www/html>
+
+    {# Ett block med regler för mappen /var/www/html #}
+    <Directory /var/www/html>
+
+        {# Tillåter att .htaccess-filer får användas för att styra beteende. #}
+        AllowOverride All
+
+        {# Tillåter alla att komma åt och använda filerna i mappen. (Enbart för Apache internt. inte för vem som får nå servern utifrån.) #}
+        Required all granted
+    </Directory>
+
+    {# Tillåt bara trafik från lastbalanseraren till Apache2 #}
+    <Location />
+        Require ip {{ hostvars['lb']['ansible_host'] }}
+    </Location>
+
+
+    {# Talar om vart Apache ska spara sina loggfiler. #}
+    ErrorLog    ${APACHE_LOG_DIR}/error.log
+    CustomLog   ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
