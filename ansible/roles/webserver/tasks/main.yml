@@ -1,0 +1,42 @@
+---
+- name: Installera Apache2
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes
+
+- name: Skapa document root-mapp
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Kopiera konfigurationen för apache2 från template
+  template:
+    src: apache-vhost.conf.j2
+    dest: /etc/apache2/sites-available/webbserver.conf
+  notify: Restart Apache
+
+- name: Aktivera webbserver-konfigurationen
+  command: a2ensite webserver.conf
+  notify: Restart Apache
+
+- name: Inaktivera default-sidan
+  command: a2adissite 000-default.conf
+  notify: Restart Apache
+
+- name: kopiera index.html från template
+  template: 
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  
+- name: Säkerställ att Apche är startad och aktiverad vid boot
+  service: 
+    name: apache2
+    state: started
+    enabled: yes
