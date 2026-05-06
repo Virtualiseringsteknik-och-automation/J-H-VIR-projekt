@@ -1,7 +1,7 @@
 upstream backend {
     #Ansible loopar automatiskt igenom alla servrar i gruppen [webservers] från inventoryfilen.
 {% for hosts in groups['webservers'] %}
-    server {{hostvars[hosts]['ansible_hosts']}}:80;
+    server {{hostvars[hosts]['ansible_host']}}:80;
 {% endfor %}
 }
 
