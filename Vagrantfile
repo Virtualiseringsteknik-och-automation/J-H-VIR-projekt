@@ -7,6 +7,7 @@ Vagrant.configure("2") do |config|
   LOADBALANCER_IP ="192.168.56.10"
   WEBSERVER1_IP ="192.168.56.11"
   WEBSERVER2_IP ="192.168.56.12"
+  WEBSERVER3_IP ="192.168.56.14"  
   DATABASE_IP ="192.168.56.13"
   #Variabler för VMarnas prestanda
   VM_MEMORY ="512"
@@ -167,6 +168,39 @@ Vagrant.configure("2") do |config|
       chmod 600 /home/vagrant/.ssh/authorized_keys
       chown -R vagrant:vagrant /home/vagrant/.ssh
     echo ===web2 klar===
+    SHELL
+  end
+
+  #==========Webserver3==========
+  config.vm.define "web3" do |web3|
+    #Tilldelar ett namn till vm i hostmaskinen.
+    web3.vm.hostname = "web3"
+    #Tilldelar en ipadress till VM i ett privat nätverk.
+    web3.vm.network "private_network", ip: WEBSERVER3_IP
+    #Anger vilket värdprogrram som ska köra VM.
+    web3.vm.provider "virtualbox" do |vb|
+      #Tilldelar internt namn i VM
+      vb.name = "webserver3"
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.memory = VM_MEMORY
+      #Anger hur myckket ramminne VM får använda från värdmaskinen.
+      vb.cpus = VM_CPUS
+    end
+    web3.vm.provision "shell", inline: <<-SHELL
+      #Uppdatera ubuntu
+      apt-get update -y      
+      #Skapar mappen ".ssh" i användarmappen "vagrant"
+      mkdir -p /home/vagrant/.ssh
+
+      #Kopierar in den publika ssh-nyckeln till listan med auktoriserade ssh-nycklar
+      cat /vagrant/ansible_id_ed25519.pub \
+        >> /home/vagrant/.ssh/authorized_keys
+
+      #Ändrar rättigheter på .ssh-mappen
+      chmod 700 /home/vagrant/.ssh
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+      chown -R vagrant:vagrant /home/vagrant/.ssh
+    echo ===web3 klar===
     SHELL
   end
 end
