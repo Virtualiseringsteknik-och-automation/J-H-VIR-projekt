@@ -1,0 +1,31 @@
+# headplaybook som körs på alla hostar i inventariet
+
+
+# konfa alla maskiner med grundläggande saker som t.ex uppdateringar 
+- name: konfigurera alla hostar
+  hosts: all
+  become: yes
+  roles:
+    - common
+
+# sätter upp databasen
+- name: installera och konfigurera databasen
+  hosts: database
+  become: yes
+  roles:
+    - database 
+
+
+# sätter upp webservrarna
+- name: installera nginx och koppla dem till databasen
+  hosts: webservers
+  become: yes
+  roles:
+    - webserver
+
+# konfigurerar loadbalancern
+- name: installera  och konfigurera loadbalancern
+  hosts: loadbalancer
+  become: yes
+  roles:
+    - loadbalancer

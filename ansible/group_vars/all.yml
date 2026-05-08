@@ -1,0 +1,12 @@
+
+# här läger vi alla variabler som är gemensamma för samtliga hostar
+ansible_user: "vagrant"
+ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+ansible_ssh_private_key_file: "/home/vagrant/.ssh/id_ed25519"
+
+
+# datanbasvariabler ligger även här så att webservranrna kan använda dem till att skicka data till databasen
+db_name: "db"
+db_user: "vagrant"
+# lösenordet bör man skriva i en secrets-fil istället för att ha det i klartext (härdning 101)
+db_password: "vagrant"

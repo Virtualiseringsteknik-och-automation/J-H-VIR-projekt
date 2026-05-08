@@ -1,0 +1,14 @@
+# här lägger vi grundläggande paket och rutiner som körs på alla hostar.
+
+- name: uppdarera APT-cachen #samma som apt-get update
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600 # uppdatera cachen om den är äldre än 1 timme
+
+- name: installera nödvändiga paket
+  ansible.builtin.apt:
+    name:
+      - curl
+      - nano
+      - htop
+    state: present
