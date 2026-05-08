@@ -211,3 +211,6 @@ secrets.env
 
 #Publika ssh-nyckeln för vagrant
 ansible_id_ed25519.pub
+.vagrant/
+*.log
+*.retry
