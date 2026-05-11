@@ -61,3 +61,16 @@
     state: present
   loop: "{{ groups['webservers'] }}"
   notify: Starta om PostgreSQL
+  
+ # Här skapar vi tabellen som webbservrarna ska skriva till
+- name: Skapa tabellen 'messages' i databasen
+  community.postgresql.postgresql_query:
+    db: "{{ db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS messages (
+          id SERIAL PRIMARY KEY,
+          message TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+  become: yes
+  become_user: postgres
