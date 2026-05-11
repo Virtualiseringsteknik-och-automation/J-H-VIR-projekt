@@ -1,17 +1,62 @@
 ---
 - name: Installera Apache2
   apt:
-    name: apache2
+    name:
+      - apache2
+      - libapache2-mod-wsgi-python3
+      - python3-flask
+      - python3-psycopg2
     state: present
     update_cache: yes
 
-- name: Skapa document root-mapp
+- name: Skapa en mapp för chatt-appen
   file:
-    path: /var/www/html
+  # vi lägger chatt koden en egen mapp
+  # så att den inte blandas med HTML
+    path: /var/www/chatt
     state: directory
     owner: www-data
     group: www-data
     mode: '0755'
+
+- name: skapa mapp för HTML-mallar
+  file:
+  # Flask vill ha HTML-filer i en undermapp
+  # som ska heta templates (inte samma som templates som i den delade mappen)
+    path: /var/www/chatt/templates
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: kopiera in python kod (app.py) från template
+  tempalte:
+  # vi använder templates för att kunna skicka in
+  #lösenord etc som variabler
+    src: app.py.j2
+    dest: /var/www/chatt/app.py
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: Restart Apache
+
+- name: kopiera in wsgi-filerna
+  template:
+    src: app.wsgi.j2
+    dest: /var/www/chatt/app.wsgi
+    owner: www-data
+    group: wwww-data
+    mode: '0644'
+  notify: Restart Apache
+
+- name: kopiera chattens HTML-sida (index.html)
+  template:
+    src: index.html.j2
+    dest: /var/www/chatt/templates/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notufy: Restart Apache
 
 - name: Kopiera konfigurationen för apache2 från template
   template:
@@ -27,14 +72,6 @@
   command: a2dissite 000-default.conf
   notify: Restart Apache
 
-- name: kopiera index.html från template
-  template: 
-    src: index.html.j2
-    dest: /var/www/html/index.html
-    owner: www-data
-    group: www-data
-    mode: '0644'
-  
 - name: Säkerställ att Apche är startad och aktiverad vid boot
   service: 
     name: apache2
