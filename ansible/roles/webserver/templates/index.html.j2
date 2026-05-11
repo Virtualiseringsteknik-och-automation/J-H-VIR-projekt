@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <title>Testhemsidans head</title>
+    <title>Chatta här!</title>
+    <meta charset="utf-8">
+    <style>
+        body{ front-family: sans-serif; padding: 20px; padding-bottom: 80px; }
+        .chat-box { border: 2px solid #4d10bd; padding: 15px; margin-bottom: 20px;
+        height: 300px; overflow-y: scroll; background: rgba(5, 155, 142, 0.6); }
+        .massage {margin-bottom: 10px; border-bottom: 1px solid #cb1515 padding-bottom: 5px; }
+        .timestamp { font-size: 0.8em; color: #888; }
+        input[type="text"] { width: 70%; padding: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+    <style>
 </head>
 
 <body>
 
     Hemsidans body
+    <h1>Global Chatt<h1>
+    {% raw %}
+    <div class="chat-box">
+        {% for msg in messages %}
+            <div class="message">
+                 <span class="timestamp">{{ msg[1].strftime('%Y-%m-%d %H:%M') }}</span><br>
+                 <strong>{{ msg[0] }}</strong>
+            </div>
+        {% else %}
+            <p>Inga meddelanden än. Skriv dit bästa skämt!</p>
+        {% endfor %}
+    </div>
 
 <!-- Banner som visar vilken server som svarar -->
     <div style="
