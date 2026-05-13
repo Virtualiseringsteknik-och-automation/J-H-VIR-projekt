@@ -62,7 +62,7 @@ Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block s
 
 - [VirtualBox](https://www.virtualbox.org/) — testat med version 7.2.6
 - [Vagrant](https://www.vagrantup.com/) — testat med version 2.4.9
-- [Git](https://git-scm.com/)
+- [Git](https://git-scm.com/) - testat med version 2.52.0.windows.1
 
 **Hårdvarukrav:**
 
