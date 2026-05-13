@@ -126,6 +126,17 @@ ansible-playbook site.yml
 
 ## Secrets
 
+Filen `secrets.env` måste skapas lokalt och **ska aldrig committas till Git** (den finns i `.gitignore`).
+
+Skapa filen i projektets rotkatalog med följande innehåll:
+
+```
+export DB_PASSWORD="DITT_LÖSENORD_HÄR"
+```
+
+Filen läses av group_vars/all.yml och innehåller lösenord som webbservrarna använder för att kunna prata med databasen.
+
+---
 
 
 ## Säkerhetsåtgärder
