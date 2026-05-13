@@ -1,5 +1,5 @@
 ---
-- name: Installera Apache2
+- name: Installera Apache2, flask och nödvändiga paket
   apt:
     name:
       - apache2

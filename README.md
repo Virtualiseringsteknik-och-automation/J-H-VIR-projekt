@@ -92,10 +92,21 @@ Definierar fyra virtuella maskiner i VirtualBox med ett gemensamt host-only-nät
 
 Konfigurationsfilen innehåller två sektioner. Under `[defaults]` inaktiveras `host_key_checking` vilket gör att Ansible inte ställer en kontrollfråga första gången den ansluter till en ny server — praktiskt i en labbmiljö där VMs återkapas ofta. Inventory pekas ut till `./inventory.ini` så att man inte behöver ange den manuellt vid varje körning. Under `[ssh_connection]` aktiveras `allow_world_readable_tmpfiles` vilket tillåter Ansible att läsa temporära filer från mappar som är tillgängliga för alla användare, något som krävs när Ansible ansluter som en annan användare än den som äger filerna.
 
+### site.yml
+
+Master playbook som innehåller 4 plays som körs uppifrån och ner: 1. 'common' kör uppdateringar och installerar "bra att ha paket" så som curl och htop. 2. 'databasen' installerar och konfigurerar PostgreSQL samt kopplar webbservrarna till databasen 3. 'webserver' installerar apache2, Flask och nödvändiga paket så att apache kan läsa python samt kopierar in kod från templates in i flask miljön 4. 'loadbalancern' installerar nginx och sätter den i "loadbalancer läget"
+
+### Rollen common
+Försöker göra en uppdatering om installationen är äldre en 1 timma och ser till att 3 "bra att ha" felsöknings paket är installerade 
+
+### Rollen webserver
+Installerar apache2, python3-psycopg2, python3-flask samt libapache2-mod-wsgi-py3 (för att apache ska kunna läsa python kod) på samtliga webservrar. samt koppierar in alla templates in i Flask miljön så att webservrarna faktiskt visar en hemsida med funkrion
+
 ### Rollen loadbalancer
 
 Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block som itererar över alla servrar i `[webservers]`. Varje server konfigureras med `max_fails=3 fail_timeout=30s` vilket är Nginx:s passiva health check — om en server inte svarar på tre requests tas den automatiskt bort från rotationen i 30 sekunder. Handlers startar om och laddar om Nginx.
 
+### Rollen databas
 
 
 ## Krav och förutsättningar
