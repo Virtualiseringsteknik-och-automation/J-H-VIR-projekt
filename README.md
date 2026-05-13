@@ -32,7 +32,7 @@
 | `web1` | Webbserver | 192.168.56.11 | — | Apache + Python, konfigurerad identiskt med web2|
 | `web2` | Webbserver | 192.168.56.12 | — | Apache + Python, konfigurerad identiskt med web1|
 | `db` | Databas + kontrollnod | 192.168.56.13 | — | PostgreSQL-databas samt Ansible-kontrollnod. Ingen port forwarding — ej nåbar utifrån |
-| `web3` | Webbserver | 192.168.56.14 | — | Exempelwebbserver som visar skalbarheten. Apache + Python, konfigurerras identiskt med web1 och web2|
+| *`web3`* | *Webbserver* | *192.168.56.14* | — | *Exempelwebbserver som visar skalbarheten. Apache + Python, konfigurerras identiskt med web1 och web2*|
 
 ## Mappstruktur
 
