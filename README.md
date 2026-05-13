@@ -76,7 +76,7 @@ Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se
 
 ## Kom igång
 
-```bash
+bash
 # 1. Klona repot
 git clone https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git
 cd J-H-VIR-projekt
@@ -96,7 +96,7 @@ ansible-playbook site.yml
 
 # 6. Öppna gästboken i webbläsaren
 # http://localhost:8080/app.py
-```
+
 
 **Förväntat slutresultat:**
 
