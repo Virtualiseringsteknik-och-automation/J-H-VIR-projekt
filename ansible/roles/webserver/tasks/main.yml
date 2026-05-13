@@ -30,7 +30,7 @@
     mode: '0755'
 
 - name: kopiera in python kod (app.py) från template
-  tempalte:
+  template:
   # vi använder templates för att kunna skicka in
   #lösenord etc som variabler
     src: app.py.j2
