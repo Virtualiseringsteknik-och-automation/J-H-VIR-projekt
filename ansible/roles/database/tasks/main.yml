@@ -74,3 +74,20 @@
           )
   become: yes
   become_user: postgres
+
+- name: Ge användaren rättigheter på tabellen messages
+  community.postgresql.postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    objs: messages
+    privs: ALL
+    type: table
+
+- name: Ge användaren rättigheter på sekvensen (för ID-räknaren)
+  community.postgresql.postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    objs: messages_id_seq
+    privs: USAGE,SELECT
+    type: sequence
+  
