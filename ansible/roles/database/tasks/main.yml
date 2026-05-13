@@ -49,7 +49,7 @@
     regexp: "^#?listen_addresses"
     # här säger vi åt postgresql att lyssna på alla IP-adresser.
     line: "listen_addresses = '*'"
-  notify: restart nginx
+  notify: restart postgresql
 
 # här lägger vi till webservrarna i pg_hba.conf så att de får rätt att prata med databasen.
 - name: Lägg till webbservrarna på gästlistan (pg_hba.conf)
@@ -60,7 +60,7 @@
     line: "host    {{ db_name }}    {{ db_user }}    {{ hostvars[item]['ansible_host'] }}/32    scram-sha-256"
     state: present
   loop: "{{ groups['webservers'] }}"
-  notify: restart nginx
+  notify: restart postgresql
   
  # Här skapar vi tabellen som webbservrarna ska skriva till
 - name: Skapa tabellen 'messages' i databasen
