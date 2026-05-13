@@ -1,12 +1,10 @@
 # flask startar en simpel app för att hantera meddelanden
-import os
-import dotenv 
 from flask import Flask, render_template, request, url_for, redirect
 import psycopg2
 import socket
 
 
-load_dotenv(dotenv_path='/home/vagrant/secrets.env')
+
 
 app = Flask(__name__)
 
