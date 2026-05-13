@@ -22,7 +22,10 @@
 
 ## Arkitektur
 
-
+```
+![Ansibles funktion](docs/Topologi%20Ansible.jpg)
+![Webbappens funktion](docs/Topologi%20webbapp.jpg)
+```
 
 ## Miljöer och IP-adresser
 
