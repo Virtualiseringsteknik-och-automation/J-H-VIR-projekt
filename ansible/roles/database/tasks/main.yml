@@ -82,6 +82,8 @@
     objs: messages
     privs: ALL
     type: table
+  become: yes
+  become_user: postgres
 
 - name: Ge användaren rättigheter på sekvensen (för ID-räknaren)
   community.postgresql.postgresql_privs:
@@ -90,4 +92,6 @@
     objs: messages_id_seq
     privs: USAGE,SELECT
     type: sequence
+  become: yes
+  become_user: postgres
   
