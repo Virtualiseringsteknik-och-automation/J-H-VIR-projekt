@@ -45,7 +45,7 @@
     src: app.wsgi.j2
     dest: /var/www/chatt/app.wsgi
     owner: www-data
-    group: wwww-data
+    group: www-data
     mode: '0644'
   notify: restart apache
 
