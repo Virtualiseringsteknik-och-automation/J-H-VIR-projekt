@@ -6,17 +6,17 @@
 
 ## Innehållsförteckning
 
-- [Arkitektur] (#arkitektur)
-- [Miljöer och IP-adresser] (#miljöer-och-ip-adresser)
-- [Mappstruktur] (#mappstruktur)
-- [Komponenter] (#komponenter)
-- [Krav och förutsättningar] (#krav-och-förutsättningar)
-- [Kom igång] (#kom-igång)
-- [Secrets] (#secrets)
-- [Säkerhetsåtgärder] (#säkerhetsåtgärder)
-- [Säkerhetsanalys] (#sökerhetsanalys)
-- [Verifiering] (#verifiering)
-- [Designval och motivering]
+- [Arkitektur](#arkitektur)
+- [Miljöer och IP-adresser](#miljöer-och-ip-adresser)
+- [Mappstruktur](#mappstruktur)
+- [Komponenter](#komponenter)
+- [Krav och förutsättningar](#krav-och-förutsättningar)
+- [Kom igång](#kom-igång)
+- [Secrets](#secrets)
+- [Säkerhetsåtgärder](#säkerhetsåtgärder)
+- [Säkerhetsanalys](#sökerhetsanalys)
+- [Verifiering](#verifiering)
+- [Designval och motivering](#designval-och-motivering)
 
 ---
 
