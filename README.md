@@ -96,7 +96,7 @@ ansible-playbook site.yml
 
 # 6. Öppna gästboken i webbläsaren
 # http://localhost:8080/app.py
-```
+
 
 **Förväntat slutresultat:**
 
