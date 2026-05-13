@@ -19,3 +19,45 @@
 - [Designval och motivering]
 
 ---
+
+## Arkitektur
+
+
+
+## Miljöer och IP-adresser
+
+
+
+## Mappstruktur
+
+
+
+## Komponenter
+
+
+
+## Krav och förutsättningar
+
+
+
+## Kom igång
+
+
+
+## Secrets
+
+
+
+## Säkerhetsåtgärder
+
+
+
+## Säkerhetsanalys
+
+
+
+## Verifiering
+
+
+
+## Designval och motivering
