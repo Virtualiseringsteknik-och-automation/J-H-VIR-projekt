@@ -1,0 +1,57 @@
+{# flask startar en simpel app för att hantera meddelanden #}
+from flask import Flask, render_template, request, url_for
+import psycopg2
+import socket
+
+app = Flask(__name__)
+
+{# ansible fyller i variablerena när playbooken körs #}
+BD_HOST = "{{ hostvars ['db'] ['ansible_host'] }}"
+DB_NAME = "{{ db_name }}"
+DB_USER = "{{ db_user }}"
+DB_PASSWORD = "{{ db_password }}"
+
+def get_db_connection():
+    {# Skapar en anslutning till databasen #}
+    conn = psycopg2.connect(
+        host=BD_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD
+        )
+        return conn
+
+@app.route('/' methods=['GET', 'POST'])
+def index():
+    {# Hämtar serverns unika namn ( superviktigt för att webbläsaren ska se att lastbalanseraren byter server åt oss) #}
+    server_name = socket.gethostname()
+
+    {# om någon skickar ett nytt meddelande och klickar på "Skicka" #}
+    if request.method == 'POST':
+        new_message = request.form.get('message')
+         {# sparar endast om det finns ett text att spara #}
+            if new_message:
+                conn = get_db_connection()
+                cur = conn.cursor()
+                cur.execute('INSERT INTO messages (message) VALUES (%s)', (new_message,))
+                conn.commit()
+                cur.close()
+                conn.close()
+
+            {# efter att ha sparat det nya meddelandet så laddar vi sidan igen #}
+                return url_for('index')
+
+    {# om någon bara besöker sidan så hämtas alla meddelanden från databasen och visas #} 
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    {# hämtar alla meddelanden med det senaste längst upp #}
+    cur.execute('SELECT message FROM messages ORDER BY created_at DESC')
+    messages = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return render_template('index.html', messages=messages, server_name=server_name)
+
+if __name__ == '__main__':
+    app.run(debug=True)
