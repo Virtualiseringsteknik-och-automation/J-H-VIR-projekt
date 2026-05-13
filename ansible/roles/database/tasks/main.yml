@@ -1,0 +1,63 @@
+
+
+- name: Installera PostgreSQL och nödvändigt Python-bibliotek
+  ansible.builtin.apt:
+    name:
+      # ACL installeras så att ansible kan ge rättigheter till PostgreSQL-filerna innan vi startar tjänsten.
+      - acl
+      - postgresql
+    # postgresql-contrib innehåller extra verktyg och funktioner som kan vara användbara
+      - postgresql-contrib
+    # viktigt att psycopg2 installeras så att ansible kan prata med PostgreSQL
+      - python3-psycopg2
+    state: present
+
+# ansible ser till att PostgreSQL är igång och startar det om det inte redan är det.
+- name: Se till att PostgreSQL är igång
+  ansible.builtin.service:
+      name: postgresql
+      state: started
+      enabled: yes
+
+#
+- name: Skapa databasen
+  community.postgresql.postgresql_db:
+  # de lockiga paranteserna gör att vi kan referera till variablerna i group_vars/all.yml
+    name: "{{ db_name }}"
+  become : yes
+  # become_user: postgres gör att ansible kör det här steget som användaren postgres.
+  #detta är viktigt eftersom att det är den användaren som har rätt till att skapa-
+  # databaser i programmet
+  become_user: postgres
+
+# här skapar ansible en användare i PostgreSQL som kopplas till en dold användare 
+# som skapas i Linux man installerar PostgreSQL. 
+- name: Skapa databasanvändare med lösenord
+  community.postgresql.postgresql_user:
+    db: "{{ db_name }}"
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "ALL"
+  become: yes
+  become_user: postgres
+
+# här ser vi till att PostgreSQL lyssnar på alla IP-adresser så att webservrarna kan prata
+# med databasen.
+- name: Konfigurera PostgreSQL att lyssna på alla IP-adresser
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/14/main/postgresql.conf
+    regexp: "^#?listen_addresses"
+    # här säger vi åt postgresql att lyssna på alla IP-adresser.
+    line: "listen_addresses = '*'"
+  notify: Starta om PostgreSQL
+
+# här lägger vi till webservrarna i pg_hba.conf så att de får rätt att prata med databasen.
+- name: Lägg till webbservrarna på gästlistan (pg_hba.conf)
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/14/main/pg_hba.conf
+    # här säger vi att endast webservrarna i inventariet får prata med databasen
+    #de måste också använda scram-sha-256 som krypteringsmetod för att autentisera sig.
+    line: "host    {{ db_name }}    {{ db_user }}    {{ hostvars[item]['ansible_host'] }}/32    scram-sha-256"
+    state: present
+  loop: "{{ groups['webservers'] }}"
+  notify: Starta om PostgreSQL
