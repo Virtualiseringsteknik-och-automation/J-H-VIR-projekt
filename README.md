@@ -76,7 +76,46 @@ Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se
 
 ## Kom igång
 
+```bash
+# 1. Klona repot
+git clone https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git
+cd J-H-VIR-projekt
 
+# 2. Skapa secrets-filen (se avsnittet Secrets nedan)
+
+
+# 3. Starta alla VMs 
+vagrant up
+
+# 4. SSH in på kontrollnoden (db-maskinen)
+vagrant ssh db
+
+# 5. Kör playbooken
+cd ~/ansible/ansible
+ansible-playbook site.yml
+
+# 6. Öppna gästboken i webbläsaren
+# http://localhost:8080/app.py
+```
+
+**Förväntat slutresultat:**
+
+Öppna `http://localhost:8080/app.py` i webbläsaren. Du ska se gästboken med ett formulär. Skriv ett inlägg — det sparas i databasen och syns direkt. Bannern längst ned i webbläsarfönstret visar vilken webbserver (`web1` eller `web2`) som svarade på requesten.
+
+### Lägga till en ny webbserver
+
+Ny webbserver läggs till i **två filer** på hostmaskinen utan att ändra någon annan konfiguration:
+
+**Vagrantfile** — (Webbservern "web3" finns redan inlagd för proof of concept ta enbart bort hashen "#" för att lägga till den. Det behövs göras på rad 10 och raderna 175 - 205)
+
+**ansible/inventory.ini** — Tag bort hashen "#" på raden för "web3":
+
+Kör sedan `vagrant up web3` 
+SSH:a in i databasmaskinen: `vagrant ssh db`
+Kör ansible playbook: `ansible-playbook site.yml`.
+Nginx-konfigurationen uppdateras automatiskt och börjar skicka trafik till den nya servern.
+
+---
 
 ## Secrets
 
