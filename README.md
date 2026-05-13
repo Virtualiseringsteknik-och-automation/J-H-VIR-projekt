@@ -96,7 +96,7 @@ ansible-playbook site.yml
 
 # 6. Öppna gästboken i webbläsaren
 # http://localhost:8080/app.py
-
+```
 
 **Förväntat slutresultat:**
 
@@ -110,11 +110,18 @@ Ny webbserver läggs till i **två filer** på hostmaskinen utan att ändra någ
 
 **ansible/inventory.ini** — Tag bort hashen "#" på raden för "web3":
 
-Kör sedan `vagrant up web3` 
-SSH:a in i databasmaskinen: `vagrant ssh db`
-Kör ansible playbook: `ansible-playbook site.yml`.
-Nginx-konfigurationen uppdateras automatiskt och börjar skicka trafik till den nya servern.
+```bash
+#Starta den nya webservern
+vagrant up web3 
 
+#SSH:a in i databasmaskinen 
+vagrant ssh db
+
+#Kör ansible playbook 
+ansible-playbook site.yml
+
+#Nginx-konfigurationen uppdateras automatiskt och börjar skicka trafik till den nya servern.
+```
 ---
 
 ## Secrets
