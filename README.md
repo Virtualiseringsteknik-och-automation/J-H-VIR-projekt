@@ -40,6 +40,12 @@
 
 ## Komponenter
 
+### Vagrantfile
+
+Definierar fyra virtuella maskiner i VirtualBox med ett gemensamt host-only-nätverk (`192.168.56.0/24`). Port forwarding på lb-VM:en (`80 → 8080`) gör att webbapplikationen är nåbar från Windows-hosten. Databasservern har medvetet ingen port forwarding.
+
+`db`-VM:en fungerar även som Ansible-kontrollnod. Vid uppstart klonar den automatiskt repot från GitHub och genererar ett SSH-nyckelpar. Den publika nyckeln sparas i den delade Vagrant-mappen och kopieras automatiskt till övriga VMs vid deras bootstrap — det är så Ansible kan nå dem utan lösenord.
+
 
 
 ## Krav och förutsättningar
