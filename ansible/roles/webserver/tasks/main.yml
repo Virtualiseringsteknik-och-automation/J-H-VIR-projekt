@@ -38,7 +38,7 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  notify: Restart Apache
+  notify: restart apache
 
 - name: kopiera in wsgi-filerna
   template:
@@ -47,7 +47,7 @@
     owner: www-data
     group: wwww-data
     mode: '0644'
-  notify: Restart Apache
+  notify: restart apache
 
 - name: kopiera chattens HTML-sida (index.html)
   template:
@@ -56,21 +56,21 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  notufy: Restart Apache
+  notufy: restart apache
 
 - name: Kopiera konfigurationen för apache2 från template
   template:
     src: apache-vhost.conf.j2
     dest: /etc/apache2/sites-available/webbserver.conf
-  notify: Restart Apache
+  notify: restart apache
 
 - name: Aktivera webbserver-konfigurationen
   command: a2ensite webbserver.conf
-  notify: Restart Apache
+  notify: restart apache
 
 - name: Inaktivera default-sidan
   command: a2dissite 000-default.conf
-  notify: Restart Apache
+  notify: restart apache
 
 - name: Säkerställ att Apche är startad och aktiverad vid boot
   service: 
