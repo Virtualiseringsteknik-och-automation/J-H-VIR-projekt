@@ -60,13 +60,13 @@ Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block s
 
 **Programvara som måste vara installerad på Windows-hosten:**
 
-- [VirtualBox](https://www.virtualbox.org/) — testat med version 7.x
-- [Vagrant](https://www.vagrantup.com/) — testat med version 2.x
+- [VirtualBox](https://www.virtualbox.org/) — testat med version 7.2.6
+- [Vagrant](https://www.vagrantup.com/) — testat med version 2.4.9
 - [Git](https://git-scm.com/)
 
 **Hårdvarukrav:**
 
-- Minst 8 GB RAM (projektet använder totalt ~2,5 GB med alla fem VMs igång)
+- Minst 8 GB RAM (projektet använder totalt ~2 GB med alla fyra VMs igång (2,5 GB vid körning av web3 också.))
 - Minst 20 GB ledigt diskutrymme
 
 **Secrets-fil:**
