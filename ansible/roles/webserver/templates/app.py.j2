@@ -1,18 +1,18 @@
-{# flask startar en simpel app för att hantera meddelanden #}
+# flask startar en simpel app för att hantera meddelanden
 from flask import Flask, render_template, request, url_for, redirect
 import psycopg2
 import socket
 
 app = Flask(__name__)
 
-{# ansible fyller i variablerena när playbooken körs #}
-DB_HOST = "{{ hostvars ['db'] ['ansible_host'] }}"
+# ansible fyller i variablerna när playbooken körs
+DB_HOST = "{{ hostvars['db']['ansible_host'] }}"
 DB_NAME = "{{ db_name }}"
 DB_USER = "{{ db_user }}"
 DB_PASSWORD = "{{ db_password }}"
 
 def get_db_connection():
-    {# Skapar en anslutning till databasen #}
+    # Skapar en anslutning till databasen
     conn = psycopg2.connect(
         host=DB_HOST,
         database=DB_NAME,
@@ -23,13 +23,14 @@ def get_db_connection():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    {# Hämtar serverns unika namn ( superviktigt för att webbläsaren ska se att lastbalanseraren byter server åt oss) #}
+    # Hämtar serverns unika namn (superviktigt för att webbläsaren ska se att lastbalanseraren byter server åt oss)
     server_name = socket.gethostname()
 
-    {# om någon skickar ett nytt meddelande och klickar på "Skicka" #}
+    # om någon skickar ett nytt meddelande och klickar på "Skicka"
     if request.method == 'POST':
         new_message = request.form.get('message')
-        {# sparar endast om det finns ett text att spara #}
+        
+        # sparar endast om det finns en text att spara
         if new_message:
             conn = get_db_connection()
             cur = conn.cursor()
@@ -38,15 +39,15 @@ def index():
             cur.close()
             conn.close()
 
-            {# efter att ha sparat det nya meddelandet så laddar vi sidan igen #}
-            return (url_for('index'))
+        # efter att ha sparat det nya meddelandet så laddar vi sidan igen
+        return redirect(url_for('index'))
 
-    {# om någon bara besöker sidan så hämtas alla meddelanden från databasen och visas #} 
+    # om någon bara besöker sidan så hämtas alla meddelanden från databasen och visas 
     conn = get_db_connection()
     cur = conn.cursor()
-    
-    {# hämtar alla meddelanden med det senaste längst upp #}
-    cur.execute('SELECT message FROM messages ORDER BY created_at DESC')
+
+    # hämtar alla meddelanden med det senaste längst upp
+    cur.execute('SELECT message, created_at FROM messages ORDER BY created_at DESC')
     messages = cur.fetchall()
     cur.close()
     conn.close()
