@@ -56,7 +56,7 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  notufy: restart apache
+  notify: restart apache
 
 - name: Kopiera konfigurationen för apache2 från template
   template:
