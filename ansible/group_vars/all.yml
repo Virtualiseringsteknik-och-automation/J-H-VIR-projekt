@@ -9,4 +9,4 @@ ansible_ssh_private_key_file: "/home/vagrant/.ssh/id_ed25519"
 db_name: "db"
 db_user: "vagrant"
 # lösenordet bör man skriva i en secrets-fil istället för att ha det i klartext (härdning 101)
-db_password: "vagrant"
+db_password: "{{ lookup( 'env', 'DB_PASSWORD' ) }}"
