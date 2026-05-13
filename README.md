@@ -58,6 +58,20 @@ Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block s
 
 ## Krav och förutsättningar
 
+**Programvara som måste vara installerad på Windows-hosten:**
+
+- [VirtualBox](https://www.virtualbox.org/) — testat med version 7.x
+- [Vagrant](https://www.vagrantup.com/) — testat med version 2.x
+- [Git](https://git-scm.com/)
+
+**Hårdvarukrav:**
+
+- Minst 8 GB RAM (projektet använder totalt ~2,5 GB med alla fem VMs igång)
+- Minst 20 GB ledigt diskutrymme
+
+**Secrets-fil:**
+
+Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se avsnittet [Secrets](#secrets).
 
 
 ## Kom igång
