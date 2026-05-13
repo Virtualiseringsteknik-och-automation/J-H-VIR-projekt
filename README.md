@@ -26,8 +26,13 @@
 ![Webbappens funktion](docs/Topologi%20webbapp.jpg)
 
 ## Miljöer och IP-adresser
-
-
+| VM | Roll | IP-adress | Port forwarding | Beskrivning |
+|---|---|---|---|---|
+| `lb` | Lastbalanserare | 192.168.56.10 | `:80 → host:8080` | Nginx tar emot all inkommande trafik och fördelar den med round-robin |
+| `web1` | Webbserver | 192.168.56.11 | — | Apache + Python, konfigurerad identiskt med web2|
+| `web2` | Webbserver | 192.168.56.12 | — | Apache + Python, konfigurerad identiskt med web1|
+| `db` | Databas + kontrollnod | 192.168.56.13 | — | PostgreSQL-databas samt Ansible-kontrollnod. Ingen port forwarding — ej nåbar utifrån |
+| `web3` | Webbserver | 192.168.56.14 | — | Exempelwebbserver som visar skalbarheten. Apache + Python, konfigurerras identiskt med web1 och web2|
 
 ## Mappstruktur
 
