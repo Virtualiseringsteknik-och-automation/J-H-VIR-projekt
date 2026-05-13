@@ -29,6 +29,11 @@
             <p>Inga meddelanden än. Skriv dit bästa skämt!</p>
         {% endfor %}
     </div>
+    <form method="post" action="/">
+        <input type="text" name="message" placeholder="Skriv ditt meddelande här..." required>
+        <button type="submit">Skicka</button>
+    </form>
+    {% endraw %}
 
 <!-- Banner som visar vilken server som svarar -->
     <div style="
@@ -44,6 +49,7 @@
         Servad av: <strong>{{ inventory_hostname }}</strong>
         &nbsp;|&nbsp;
         IP: {{ ansible_host }}
+        Flask server hostname: {% raw %}{{ server_name }}{% endraw %}
     </div>
 
 </body>
