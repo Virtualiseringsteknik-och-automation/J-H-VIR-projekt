@@ -94,20 +94,20 @@ Konfigurationsfilen innehåller två sektioner. Under `[defaults]` inaktiveras `
 
 ### site.yml
 
-Master playbook som innehåller 4 plays som körs uppifrån och ner: 1. 'common' kör uppdateringar och installerar "bra att ha paket" så som curl och htop. 2. 'databasen' installerar och konfigurerar PostgreSQL samt kopplar webbservrarna till databasen 3. 'webserver' installerar apache2, Flask och nödvändiga paket så att apache kan läsa python samt kopierar in kod från templates in i flask miljön 4. 'loadbalancern' installerar nginx och sätter den i "loadbalancer läget"
+Master playbook som innehåller 4 plays som exekveras i följande ordning: 1. 'common' exekveras på samtliga hostar och ser till att, uppdateringar görs och installerar "bra att ha verktyg", så som curl och htop. 2. 'databasen' som körs emot databas noden. Här installeras och konfigureras PostgreSQL, samt nödvändiga inställningar som säkrar komunikation från och till webbservrarna. 3. 'webserver' riktar sig emot webb noderna och installerar apache2, Flask och relaterade paket. Den kofigurerar även miljön så att apache2 kan exekvera pythonkod samt kopiera in app koden från templates till sin Flask miljö 4. 'loadbalancer' körs sist och installerar nginx som sedan konfigureras till att agera lastbalanserare eftersom att webbservrarna redan är igång så kan nginx direkt börja dirigera trafiken till dom.
 
 ### Rollen common
 Försöker göra en uppdatering om installationen är äldre en 1 timma och ser till att 3 "bra att ha" felsöknings paket är installerade 
 
 ### Rollen webserver
-Installerar apache2, python3-psycopg2, python3-flask samt libapache2-mod-wsgi-py3 (för att apache ska kunna läsa python kod) på samtliga webservrar. samt koppierar in alla templates in i Flask miljön så att webservrarna faktiskt visar en hemsida med funkrion
+Denna roll ansvarar för att driftsätta och konfigurera Flask-applikationen. I denna miljö driftas Flask via Apache2 och mod_wsgi. Rollen Installerar apache2, python3-flask, python3-psycopg2 och modulen libapache2-mod-wsgi-py3 för Python-exekvering. sedan skapar applokationskatalogen /var/www/chatt som inkluderar bland annat undermappar för HTLM med rätt ägenderättigheter för www-data. Rollen utnytjar Ansibles Jinja2 templates för att skicka in miljövariablerdirekt i koden. Som då inkluderar databasuppgifter, WSGI-konfiguration och dynamiska IP-adresser till HTML-bannern. Apaches VirtualHost konfigureras med dedikerade WSGI-processgrupper. Trafik begränsas via en "Require ip regel" som säkerställer att endast lastbalanceraren får ansluta till webbservern.
 
 ### Rollen loadbalancer
 
 Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block som itererar över alla servrar i `[webservers]`. Varje server konfigureras med `max_fails=3 fail_timeout=30s` vilket är Nginx:s passiva health check — om en server inte svarar på tre requests tas den automatiskt bort från rotationen i 30 sekunder. Handlers startar om och laddar om Nginx.
 
 ### Rollen databas
-
+Denna roll ansvarar för att installera, konfigurera och säkra PostgreSQL-databasen. Till skillnad från en statisk konfiguration är denna roll utformad för att dynamiskt anpassa sig efter den skalbara webbserver-miljön. Här installeras postgresql, postgresql-contrib samt paketen acl och python3-psycopg2 för att Ansible ska kunna hantera rättigheter och kommunicera med databasen. Rollen skapar databasen och en dedikerad applikationsanvändare. Både databasnamn och inloggningsuppgifter hämtas säkert från group_vars. Automatiskt skapas tabellen messages med informations kolumner relevanta till vart och när medelandet kom ifrån och tilldelar applikationsanvändaren nödvändiga rättigheter till tabellen. PostgreSQL konfigureras till att lyssna på nätverket (listen_addresses = '*'). För att uppräthålla en hög säkerhetsnivå och full skalbarhet används en Ansible-loop som kollar över gruppen [webservers] i inventariet. Denna loop lägger dynamiskt in webbservrarnas aktuella IP-adresser i "gästlistan" (pg_hba.conf), vilket innebär att endast aktiva webbservrar tillåts ansluta. All autentisering säkras dessutom med krypteringsmetoden scram-sha-256. Ansible-handlers används för att automatiskt starta om eller ladda om PostgreSQL vid uppdateringar av konfigurationsfilerna.
 
 ## Krav och förutsättningar
 
