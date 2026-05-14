@@ -77,3 +77,12 @@
     name: apache2
     state: started
     enabled: yes
+
+
+- name: Kopiera in health check-skriptet
+  template:
+    src: health.py.j2
+    dest: /usr/local/bin/health.py
+    owner: root
+    group: root
+    mode: '0755'
