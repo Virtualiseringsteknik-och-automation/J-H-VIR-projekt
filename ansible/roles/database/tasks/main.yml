@@ -1,36 +1,34 @@
 
-
+# ACL installeras så att ansible kan ge rättigheter till PostgreSQL-filerna innan vi startar tjänsten.
+# Postgresql-contrib innehåller extra verktyg och funktioner som kan vara användbara.
+# Viktigt att psycopg2 installeras så att ansible kan prata med PostgreSQL.
 - name: Installera PostgreSQL och nödvändigt Python-bibliotek
   ansible.builtin.apt:
     name:
-      # ACL installeras så att ansible kan ge rättigheter till PostgreSQL-filerna innan vi startar tjänsten.
       - acl
       - postgresql
-    # postgresql-contrib innehåller extra verktyg och funktioner som kan vara användbara
       - postgresql-contrib
-    # viktigt att psycopg2 installeras så att ansible kan prata med PostgreSQL
       - python3-psycopg2
     state: present
 
-# ansible ser till att PostgreSQL är igång och startar det om det inte redan är det.
+# Ansible ser till att PostgreSQL är igång och startar det om det inte redan är det.
 - name: Se till att PostgreSQL är igång
   ansible.builtin.service:
       name: postgresql
       state: started
       enabled: yes
 
-#
+# De lockiga paranteserna gör att vi kan referera till variablerna i group_vars/all.yml.
+# Become_user: postgres gör att ansible kör det här steget som användaren postgres.
+# Detta är viktigt eftersom att det är den användaren som har rätt till att skapa-
+# databaser i programmet.
 - name: Skapa databasen
   community.postgresql.postgresql_db:
-  # de lockiga paranteserna gör att vi kan referera till variablerna i group_vars/all.yml
     name: "{{ db_name }}"
   become : yes
-  # become_user: postgres gör att ansible kör det här steget som användaren postgres.
-  #detta är viktigt eftersom att det är den användaren som har rätt till att skapa-
-  # databaser i programmet
   become_user: postgres
 
-# här skapar ansible en användare i PostgreSQL som kopplas till en dold användare 
+# Här skapar ansible en användare i PostgreSQL som kopplas till en dold användare 
 # som skapas i Linux man installerar PostgreSQL. 
 - name: Skapa databasanvändare med lösenord
   community.postgresql.postgresql_user:
@@ -41,28 +39,32 @@
   become: yes
   become_user: postgres
 
-# här ser vi till att PostgreSQL lyssnar på alla IP-adresser så att webservrarna kan prata
+# Här ser vi till att PostgreSQL lyssnar på alla IP-adresser så att webservrarna kan prata
 # med databasen.
+# Under "line:" säger vi åt postgresql att lyssna på alla IP-adresser. I en verklig produktionsmiljö 
+# skulle man ha specifiserat vilka adresser som är tillåtna som ett led i arbetet med defens in depth. 
+# I en labbmiljö är det dock okej då miljön inte är nåbar utifrån.
 - name: Konfigurera PostgreSQL att lyssna på alla IP-adresser
   ansible.builtin.lineinfile:
     path: /etc/postgresql/14/main/postgresql.conf
     regexp: "^#?listen_addresses"
-    # här säger vi åt postgresql att lyssna på alla IP-adresser.
     line: "listen_addresses = '*'"
   notify: restart postgresql
 
-# här lägger vi till webservrarna i pg_hba.conf så att de får rätt att prata med databasen.
+# Här lägger vi till webservrarna i pg_hba.conf så att de får rätt att prata med databasen.
+# Här säger vi att endast webservrarna i inventariet får prata med databasen,
+# de måste också använda scram-sha-256 som krypteringsmetod för att autentisera sig.
 - name: Lägg till webbservrarna på gästlistan (pg_hba.conf)
   ansible.builtin.lineinfile:
     path: /etc/postgresql/14/main/pg_hba.conf
-    # här säger vi att endast webservrarna i inventariet får prata med databasen
-    #de måste också använda scram-sha-256 som krypteringsmetod för att autentisera sig.
     line: "host    {{ db_name }}    {{ db_user }}    {{ hostvars[item]['ansible_host'] }}/32    scram-sha-256"
     state: present
   loop: "{{ groups['webservers'] }}"
   notify: restart postgresql
   
- # Här skapar vi tabellen som webbservrarna ska skriva till
+# Skapar tabellen som gästboksapplikationen skriver meddelanden till.
+# IF NOT EXISTS gör att tasken är idempotent — körs playbooken igen
+# skapas inte tabellen på nytt om den redan finns.
 - name: Skapa tabellen 'messages' i databasen
   community.postgresql.postgresql_query:
     db: "{{ db_name }}"
@@ -75,6 +77,9 @@
   become: yes
   become_user: postgres
 
+# Ger databasanvändaren rättighet att läsa och skriva till tabellen.
+# Utan detta får webbapplikationen "permission denied" när den försöker
+# hämta eller spara meddelanden.
 - name: Ge användaren rättigheter på tabellen messages
   community.postgresql.postgresql_privs:
     db: "{{ db_name }}"
@@ -85,6 +90,9 @@
   become: yes
   become_user: postgres
 
+# SERIAL-kolumnen (id) använder en sekvens internt för att räkna upp ID:n.
+# USAGE och SELECT krävs för att användaren ska kunna läsa och använda
+# denna sekvens när nya rader infogas.
 - name: Ge användaren rättigheter på sekvensen (för ID-räknaren)
   community.postgresql.postgresql_privs:
     db: "{{ db_name }}"
