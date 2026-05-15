@@ -46,7 +46,7 @@ if __name__ == '__main__':
     db_ok, db_msg = check_database()
     apache_ok, apache_msg = check_apache()
     
-    {# Skriv ut resultaten #}
+    # Skriv ut resultaten #
     print(f"[ {'+' if db_ok else '-'} ] {db_msg}")
     print(f"[ {'+' if apache_ok else '-'} ] {apache_msg}")
     print("-----------------------------------")
