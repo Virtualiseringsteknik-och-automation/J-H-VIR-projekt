@@ -4,10 +4,10 @@
     <title>Chatta här!</title>
     <meta charset="utf-8">
     <style>
-        body{ front-family: sans-serif; padding: 20px; padding-bottom: 80px; }
+        body{ font-family: sans-serif; padding: 20px; padding-bottom: 80px; }
         .chat-box { border: 2px solid #4d10bd; padding: 15px; margin-bottom: 20px;
         height: 300px; overflow-y: scroll; background: rgba(5, 155, 142, 0.6); }
-        .massage {margin-bottom: 10px; border-bottom: 1px solid #cb1515 padding-bottom: 5px; }
+        .message {margin-bottom: 10px; border-bottom: 1px solid #cb1515 padding-bottom: 5px; }
         .timestamp { font-size: 0.8em; color: #888; }
         input[type="text"] { width: 70%; padding: 10px; }
         button { padding: 10px 20px; cursor: pointer; }
@@ -16,8 +16,8 @@
 
 <body>
 
-    Hemsidans body
-    <h1>Global Chatt<h1>
+    
+    <h1>Global Chatt</h1>
     {% raw %}
     <div class="chat-box">
         {% for msg in messages %}
