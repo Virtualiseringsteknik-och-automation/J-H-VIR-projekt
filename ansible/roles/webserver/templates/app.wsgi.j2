@@ -1,3 +1,9 @@
 import sys
+
+#lägger till vår applikationsmapp i pythons path
+#så att wsgi kan hitta och importera våran Flaskapp
 sys.path.insert(0, '/var/www/chatt')
+
+#Importerar vår Flaskapp från app.py och döper om den
+#till "application" vilket är det objekt som mod_wsgi letar efter
 from app import app as application
