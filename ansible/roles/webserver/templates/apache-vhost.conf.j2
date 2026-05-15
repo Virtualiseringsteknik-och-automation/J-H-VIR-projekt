@@ -2,16 +2,17 @@
     {# Hämtar den aktuella webserverns IPv4-adress. #}
     ServerName {{ ansible_host }}
 
-    {# Talar om för Apache2 vart hemsidan den ska serva finns. #}
-    DocumentRoot /var/www/html
+    {# skapar en process för Python appen #}
+    WSGIDaemonProcess chattapp user=www-data threads=5
 
-    {# Ett block med regler för mappen /var/www/html #}
-    <Directory /var/www/html>
+    {# skickar all trafik från root till vår WSGI fil #}
+    WSGIScriptAlias / /var/www/chatt/app.wsgi
 
-        {# Tillåter att .htaccess-filer får användas för att styra beteende. #}
-        AllowOverride All
 
-        {# Tillåter alla att komma åt och använda filerna i mappen. (Enbart för Apache internt. inte för vem som får nå servern utifrån.) #}
+    {# Ett block med regler för mappen /var/www/chatt #}
+    <Directory /var/www/chatt>
+        WSGIProcessGroup chattapp
+        WSGIApplicationGroup %{global}
         Require all granted
     </Directory>
 

@@ -1,10 +1,17 @@
 ---
-- name: Restart Apache
+#Dessa kommandon körs som vanliga tasks men enbart om de triggas av "notify". 
+
+#Stoppar och startar om Apache2 helt (Kortare avbrott)
+- name: restart apache
   service: 
     name: apache2
     state: restarted
 
-- name: Reload Apache
+#Laddar om konfigurationen utan avbrott (Används i produktion)
+- name: reload apache
   service: 
     name: apache2
-    state: reloaded
+    state: reload
+
+
+#Tasks i denna fil körs alltid sist.

@@ -49,7 +49,7 @@
     regexp: "^#?listen_addresses"
     # här säger vi åt postgresql att lyssna på alla IP-adresser.
     line: "listen_addresses = '*'"
-  notify: Starta om PostgreSQL
+  notify: restart postgresql
 
 # här lägger vi till webservrarna i pg_hba.conf så att de får rätt att prata med databasen.
 - name: Lägg till webbservrarna på gästlistan (pg_hba.conf)
@@ -60,4 +60,38 @@
     line: "host    {{ db_name }}    {{ db_user }}    {{ hostvars[item]['ansible_host'] }}/32    scram-sha-256"
     state: present
   loop: "{{ groups['webservers'] }}"
-  notify: Starta om PostgreSQL
+  notify: restart postgresql
+  
+ # Här skapar vi tabellen som webbservrarna ska skriva till
+- name: Skapa tabellen 'messages' i databasen
+  community.postgresql.postgresql_query:
+    db: "{{ db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS messages (
+          id SERIAL PRIMARY KEY,
+          message TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+  become: yes
+  become_user: postgres
+
+- name: Ge användaren rättigheter på tabellen messages
+  community.postgresql.postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    objs: messages
+    privs: ALL
+    type: table
+  become: yes
+  become_user: postgres
+
+- name: Ge användaren rättigheter på sekvensen (för ID-räknaren)
+  community.postgresql.postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    objs: messages_id_seq
+    privs: USAGE,SELECT
+    type: sequence
+  become: yes
+  become_user: postgres
+  
