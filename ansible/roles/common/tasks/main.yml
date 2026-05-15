@@ -5,10 +5,12 @@
     update_cache: yes
     cache_valid_time: 3600 # uppdatera cachen om den är äldre än 1 timme
 
-- name: installera nödvändiga paket
+- name: installera paket för felsökning, analys och enklare justeringar #Precis som rubriken säger, denna ser till så att nedanstående paket är installerade på samtliga maskiner.
   ansible.builtin.apt:
     name:
-      - curl
-      - nano
-      - htop
+      - curl # Används för att testa att webbservrar och lastbalanseraren svarar direkt från terminalen
+      - nano # Textredigerare för att snabbt redigera filer direkt på en VM utan att behöva köra om playbooken.
+      - htop # För att övervaka CPU och RAM i realtid, t.ex. om något verkar hänga.
     state: present
+# I en verklig produktionsmiljö skulle deaa vertyg tas bort för att minimera möjliga attackytor. 
+# I en labbmiljö som denna är det dock fullt legitimt för ett smidigare arbetssätt
