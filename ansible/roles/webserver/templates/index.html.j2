@@ -3,14 +3,43 @@
 <head>
     <title>Chatta här!</title>
     <meta charset="utf-8">
+    
     <style>
-        body{ font-family: sans-serif; padding: 20px; padding-bottom: 80px; }
-        .chat-box { border: 2px solid #4d10bd; padding: 15px; margin-bottom: 20px;
-        height: 300px; overflow-y: scroll; background: rgba(5, 155, 142, 0.6); }
-        .message {margin-bottom: 10px; border-bottom: 1px solid #cb1515 padding-bottom: 5px; }
-        .timestamp { font-size: 0.8em; color: #888; }
-        input[type="text"] { width: 70%; padding: 10px; }
-        button { padding: 10px 20px; cursor: pointer; }
+        /* Grundläggande styling för sidan */
+        body{ 
+            font-family: sans-serif; 
+            padding: 20px; 
+            padding-bottom: 80px;
+        }
+
+        /* Styling för rutan där alla meddelanden visas */
+        .chat-box { 
+            border: 2px solid #4d10bd;
+            padding: 15px;
+            margin-bottom: 20px;
+            height: 300px;
+            overflow-y: scroll;
+            background: rgba(5, 155, 142, 0.6);
+        }
+        /* styling för enskilda meddelanden */
+        .message {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #cb1515;
+            padding-bottom: 5px; 
+        }
+        /* styling för datum och tid */
+        .timestamp {
+             font-size: 0.8em;
+             color: #f2ff63; 
+            }
+        input[type="text"] {
+             width: 70%;
+             padding: 10px;
+            }
+        button { 
+         padding: 10px 20px;
+         cursor: pointer;
+        }
     </style>
 </head>
 
@@ -18,10 +47,13 @@
 
     
     <h1>Global Chatt</h1>
+
+    <!-- Flask/jinja2 kod raw används så att Ansible inte försöker evaluera Flasks taggar -->
     {% raw %}
     <div class="chat-box">
         {% for msg in messages %}
             <div class="message">
+            <!-- Visar datum/tid och själva medelandet -->
                  <span class="timestamp">{{ msg[1].strftime('%Y-%m-%d %H:%M') }}</span><br>
                  <strong>{{ msg[0] }}</strong>
             </div>
@@ -29,13 +61,16 @@
             <p>Inga meddelanden än. Skriv dit bästa skämt!</p>
         {% endfor %}
     </div>
+ 
+    <!-- Formulär för att skicka nya meddelanden via en POST request -->
     <form method="post" action="">
         <input type="text" name="message" placeholder="Skriv ditt meddelande här..." required>
         <button type="submit">Skicka</button>
     </form>
     {% endraw %}
 
-<!-- Banner som visar vilken server som svarar -->
+<!-- En fast banner som visar vilken server som som renderade sidan.
+För att lastbalanseraren fungerar. -->
     <div style="
         position: fixed;
         bottom: 0;
