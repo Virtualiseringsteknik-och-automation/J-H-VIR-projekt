@@ -17,22 +17,25 @@ def check_database():
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
-            connect_timeout=3
+            connect_timeout=3 # En kort timeout så att scriptet inte hängersig om db är nere
         )
         cur = conn.cursor()
-        # Snabbast möjliga fråga för att se att databasen lever
+
+        # Kör den snabbast möjliga frågan för att se att databasen lever
         cur.execute('SELECT 1')
         cur.close()
         conn.close()
         return True, "Databasanslutning: OK"
     except Exception as e:
+        # Fångar upp alla fel som typ fösenord och nätvärksfel, samt returnerar dem. 
         return False, f"Databasanslutning: MISSLYCKADES ({e})"
 
 def check_apache():
     """Kollar om apache2-tjänsten faktiskt är igång i Linux."""
     try:
-        # Kör kommandot 'systemctl is-active apache2'
+        # Kör kommandot 'systemctl is-active apache2' i bakgrunden
         result = subprocess.run(['systemctl', 'is-active', 'apache2'], capture_output=True, text=True)
+        # här tas eventuella osynliga radbrytningar från Linux utskriften
         if result.stdout.strip() == 'active':
             return True, "Apache2-tjänst: OK (Körs)"
         else:
@@ -46,7 +49,7 @@ if __name__ == '__main__':
     db_ok, db_msg = check_database()
     apache_ok, apache_msg = check_apache()
     
-    # Skriv ut resultaten #
+    # Skriv ut resultaten där [+] står för ok och [-] för fel
     print(f"[ {'+' if db_ok else '-'} ] {db_msg}")
     print(f"[ {'+' if apache_ok else '-'} ] {apache_msg}")
     print("-----------------------------------")
@@ -56,6 +59,6 @@ if __name__ == '__main__':
         print("Status: HEALTHY")
         sys.exit(0)
     else:
-        # Om något är trasigt stänger vi med exit-kod 1 (vilket triggar larm i övervakningssystem)
+        # Om något är trasigt stänger vi med exit-kod 1 (vilket triggar larm i eventuella övervakningssystem)
         print("Status: UNHEALTHY")
         sys.exit(1)
