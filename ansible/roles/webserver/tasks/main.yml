@@ -3,16 +3,16 @@
   apt:
     name:
       - apache2
-      - libapache2-mod-wsgi-py3
+      - libapache2-mod-wsgi-py3 # viktigt för att Apache ska kunna köra Python/Flask
       - python3-flask
-      - python3-psycopg2
+      - python3-psycopg2 # krävs för att Python ska kunna prata med PostgreSQL
     state: present
-    update_cache: yes
+    update_cache: yes # köra apt-get update innan installation
 
 - name: Skapa en mapp för chatt-appen
   file:
-  # vi lägger chatt koden en egen mapp
-  # så att den inte blandas med HTML
+  # vi lägger chatt koden en egen mapp.
+  # för att sepparera koden från apaches standard mapp så att strukturen blir tydligare.
     path: /var/www/chatt
     state: directory
     owner: www-data
@@ -22,7 +22,7 @@
 - name: skapa mapp för HTML-mallar
   file:
   # Flask vill ha HTML-filer i en undermapp
-  # som ska heta templates (inte samma som templates som i den delade mappen)
+  # som måste, heta templates (inte samma som templates som i den delade mappen).
     path: /var/www/chatt/templates
     state: directory
     owner: www-data
@@ -38,9 +38,9 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  notify: restart apache
+  notify: restart apache # triggar handlern om filen ändras
 
-- name: kopiera in wsgi-filerna
+- name: Kopiera in WSGI-konfigurationen
   template:
     src: app.wsgi.j2
     dest: /var/www/chatt/app.wsgi
@@ -49,7 +49,7 @@
     mode: '0644'
   notify: restart apache
 
-- name: kopiera chattens HTML-sida (index.html)
+- name: Kopiera in chattens HTML-sida
   template:
     src: index.html.j2
     dest: /var/www/chatt/templates/index.html
@@ -58,31 +58,36 @@
     mode: '0644'
   notify: restart apache
 
-- name: Kopiera konfigurationen för apache2 från template
+- name: Kopiera in Apaches VirtualHost-konfiguration
   template:
     src: apache-vhost.conf.j2
     dest: /etc/apache2/sites-available/webbserver.conf
   notify: restart apache
 
-- name: Aktivera webbserver-konfigurationen
+- name: Aktivera den nya webbserver-konfigurationen
   command: a2ensite webbserver.conf
+  # args-klausulen nedan gör modulen idempotent.
+  # kommandot körs inte igen om filen redan är länkad, vilket sparar tid och undviker fel.
+  args:
+    creates: /etc/apache2/sites-enabled/webbserver.conf
   notify: restart apache
 
-- name: Inaktivera default-sidan
+- name: Inaktivera Apaches default-sida
   command: a2dissite 000-default.conf
+  args:
+    removes: /etc/apache2/sites-enabled/000-default.conf
   notify: restart apache
 
-- name: Säkerställ att Apche är startad och aktiverad vid boot
-  service: 
-    name: apache2
-    state: started
-    enabled: yes
-
-
-- name: Kopiera in health check-skriptet
+- name: Driftsätt health check-skriptet för övervakning
   template:
     src: health.py.j2
     dest: /usr/local/bin/health.py
     owner: root
     group: root
-    mode: '0755'
+    mode: '0755' # 0755 gör att skriptet blir exekverbart i Linux
+
+- name: Säkerställ att Apache2 är igång och aktiverad vid boot
+  service: 
+    name: apache2
+    state: started
+    enabled: yes
