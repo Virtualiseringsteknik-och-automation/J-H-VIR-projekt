@@ -1,4 +1,4 @@
-# flask startar en simpel app för att hantera meddelanden
+# Importerar nödvändiga bibliotek för webbserverarna, databas och nätverk
 from flask import Flask, render_template, request, url_for, redirect
 import psycopg2
 import socket
@@ -8,14 +8,14 @@ import socket
 
 app = Flask(__name__)
 
-# ansible fyller i variablerna när playbooken körs
+# Ansible fyller i variablvärdet när playbooken exikveras
 DB_HOST = "{{ hostvars['db']['ansible_host'] }}"
 DB_NAME = "{{ db_name }}"
 DB_USER = "{{ db_user }}"
 DB_PASSWORD = "{{ db_password }}"
 
 def get_db_connection():
-    # Skapar en anslutning till databasen
+    # Skapar och öppnar en anslutning till PostgreSQL databasen
     conn = psycopg2.connect(
         host=DB_HOST,
         database=DB_NAME,
@@ -29,32 +29,33 @@ def index():
     # Hämtar serverns unika namn (superviktigt för att webbläsaren ska se att lastbalanseraren byter server åt oss)
     server_name = socket.gethostname()
 
-    # om någon skickar ett nytt meddelande och klickar på "Skicka"
+    # Hanterar inkommande medelanden när användaren klickar på "Skicka"
     if request.method == 'POST':
         new_message = request.form.get('message')
         
-        # sparar endast om det finns en text att spara
+        # Ser till att meddelandet inte är tomt innan det sparas.
         if new_message:
             conn = get_db_connection()
             cur = conn.cursor()
+            # Använder parametriserade queries för att förhindra SQL-injections
             cur.execute('INSERT INTO messages (message) VALUES (%s)', (new_message,))
             conn.commit()
             cur.close()
             conn.close()
 
-        # efter att ha sparat det nya meddelandet så laddar vi sidan igen
+        # Laddar om sidan för att förhindra att meddelandet skickas igen vid uppdatering av sidan
         return redirect(request.referrer or '/')
 
-    # om någon bara besöker sidan så hämtas alla meddelanden från databasen och visas 
+    # Hämtar alla sparade meddelanden från databasen
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # hämtar alla meddelanden med det senaste längst upp
+    # Sorterar så att det senaste meddelandet hamnar högst upp
     cur.execute('SELECT message, created_at FROM messages ORDER BY created_at DESC')
     messages = cur.fetchall()
     cur.close()
     conn.close()
-
+    # Renderar html mallen och skickar med meddelandena samt servernamnet till frontend
     return render_template('index.html', messages=messages, server_name=server_name)
 
 if __name__ == '__main__':

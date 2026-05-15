@@ -1,28 +1,30 @@
 <VirtualHost *:80>
-    {# Hämtar den aktuella webserverns IPv4-adress. #}
+    # Sätter namn på den aktuella webserverns IP-addres.
     ServerName {{ ansible_host }}
 
-    {# skapar en process för Python appen #}
+    # Skapar en isolerad process för Flaskappen med 5 trådar.
+    # Detta är utmärkt för både prestanda och stabilitet för Webbserverarna.
     WSGIDaemonProcess chattapp user=www-data threads=5
 
-    {# skickar all trafik från root till vår WSGI fil #}
+    # Skickar all trafik från root (/) till vår WSGI filen.
     WSGIScriptAlias / /var/www/chatt/app.wsgi
 
 
-    {# Ett block med regler för mappen /var/www/chatt #}
+    # Ett block med regler och rättigheter för mappen som koden ligger i.
     <Directory /var/www/chatt>
         WSGIProcessGroup chattapp
         WSGIApplicationGroup %{global}
         Require all granted
     </Directory>
 
-    {# Tillåt bara trafik från lastbalanseraren till Apache2 #}
+    # En säkerhets regel som endast tillåt inkommande trafik från lastbalanseraren.
+    # All annan trafik mot Webbserverns IP blockeras.
     <Location />
         Require ip {{ hostvars['lb']['ansible_host'] }}
     </Location>
 
 
-    {# Talar om vart Apache ska spara sina loggfiler. #}
+    # Berättar vart Appache ska spara sina error och access loggar.
     ErrorLog    ${APACHE_LOG_DIR}/error.log
     CustomLog   ${APACHE_LOG_DIR}/access.log combined
 
