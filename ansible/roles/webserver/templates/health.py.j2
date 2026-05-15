@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+import psycopg2
+import subprocess
+import sys
+
+# Ansible fyller i dessa variabler när playbooken körs
+DB_HOST = "{{ hostvars['db']['ansible_host'] }}"
+DB_NAME = "{{ db_name }}"
+DB_USER = "{{ db_user }}"
+DB_PASSWORD = "{{ db_password }}"
+
+def check_database():
+    """Testar att ansluta till databasen och köra en enkel fråga."""
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            connect_timeout=3
+        )
+        cur = conn.cursor()
+        # Snabbast möjliga fråga för att se att databasen lever
+        cur.execute('SELECT 1')
+        cur.close()
+        conn.close()
+        return True, "Databasanslutning: OK"
+    except Exception as e:
+        return False, f"Databasanslutning: MISSLYCKADES ({e})"
+
+def check_apache():
+    """Kollar om apache2-tjänsten faktiskt är igång i Linux."""
+    try:
+        # Kör kommandot 'systemctl is-active apache2'
+        result = subprocess.run(['systemctl', 'is-active', 'apache2'], capture_output=True, text=True)
+        if result.stdout.strip() == 'active':
+            return True, "Apache2-tjänst: OK (Körs)"
+        else:
+            return False, "Apache2-tjänst: MISSLYCKADES (Körs inte)"
+    except Exception as e:
+        return False, f"Apache2-tjänst: MISSLYCKADES (Kunde inte kontrollera status: {e})"
+
+if __name__ == '__main__':
+    print("--- Health Check för Webbserver ---")
+    
+    db_ok, db_msg = check_database()
+    apache_ok, apache_msg = check_apache()
+    
+    # Skriv ut resultaten #
+    print(f"[ {'+' if db_ok else '-'} ] {db_msg}")
+    print(f"[ {'+' if apache_ok else '-'} ] {apache_msg}")
+    print("-----------------------------------")
+    
+    # Om båda är OK stänger vi skriptet med exit-kod 0 (som betyder att allt fungerar i Linux) 
+    if db_ok and apache_ok:
+        print("Status: HEALTHY")
+        sys.exit(0)
+    else:
+        # Om något är trasigt stänger vi med exit-kod 1 (vilket triggar larm i övervakningssystem)
+        print("Status: UNHEALTHY")
+        sys.exit(1)
