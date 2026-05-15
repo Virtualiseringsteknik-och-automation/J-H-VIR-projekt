@@ -202,6 +202,20 @@ Filen läses av group_vars/all.yml och innehåller lösenord som webbservrarna a
 
 ## Verifiering
 
+Från hostmaskinen
+```Bash
+#Anslut till någon av webservrarna via vagrant ssh:
+vagrant ssh web1
 
+#Kör följande kommando:
+python3 /usr/local/bin/health.py
+
+#Nu körs en healtcheck för att kontrollera anslutningen från webservern till både lastbalanseraren och databasen. Förväntad output är:
+--- Health Check för Webbserver ---
+[ + ] Databasanslutning: OK
+[ + ] Apache2-tjänst: OK (Körs)
+-----------------------------------
+Status: HEALTHY
+```
 
 ## Designval och motivering
