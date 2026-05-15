@@ -1,11 +1,14 @@
 # här lägger vi grundläggande paket och rutiner som körs på alla hostar.
 
-- name: uppdarera APT-cachen #samma som apt-get update
+- name: uppdarera APT-cachen 
+# Samma som apt-get update. apt-get update får dock ligga kvar i vagrantfilen för att ha den senaste versionen redan från start. 
+# Denna task låter ansible updatera maskinerna löpande över tid.
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600 # uppdatera cachen om den är äldre än 1 timme
 
-- name: installera paket för felsökning, analys och enklare justeringar #Precis som rubriken säger, denna ser till så att nedanstående paket är installerade på samtliga maskiner.
+- name: installera paket för felsökning, analys och enklare justeringar 
+#Precis som rubriken säger, denna ser till så att nedanstående paket är installerade på samtliga maskiner.
   ansible.builtin.apt:
     name:
       - curl # Används för att testa att webbservrar och lastbalanseraren svarar direkt från terminalen
