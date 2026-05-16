@@ -9,6 +9,8 @@ Vagrant.configure("2") do |config|
   WEBSERVER2_IP ="192.168.56.12"
   #WEBSERVER3_IP ="192.168.56.14"
   DATABASE_IP ="192.168.56.13"
+
+  #Variabel för Git-repot
   GITHUB_REPO ="https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git"
   
   #Variabler för VMarnas prestanda
