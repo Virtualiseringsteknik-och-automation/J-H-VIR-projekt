@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
       apt-get install -y ansible git
 
       #Klona repot till "/home/vagrant/"
-      git clone GITHUB_REPO /home/vagrant/ansible
+      git clone #{GITHUB_REPO} /home/vagrant/ansible
       chown -R vagrant:vagrant /home/vagrant/ansible
       chmod 755 /home/vagrant/ansible
 
