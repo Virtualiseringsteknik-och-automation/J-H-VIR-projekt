@@ -64,7 +64,11 @@
   
 # Skapar tabellen som gästboksapplikationen skriver meddelanden till.
 # IF NOT EXISTS gör att tasken är idempotent — körs playbooken igen
-# skapas inte tabellen på nytt om den redan finns.
+# skapas inte tabellen på nytt om den redan finns. Playbook kommer dock att rapportera denna som "changed" 
+# eftersom att ansible inte kan avgöra om SQL-frågan faktiskt ändrade någonting i databasen. Detta är en 
+# känd begränsning med denna modul men vi upptäckte det i ett sent skede varför vi valt att behålla modulen istället för
+# att byta ut den mot till exempel postgrsql_table. Idempotensen är fortfarande intakt. Det är enbart rapporteringen som brister.
+# Idempotensen kan bevisas genom att köra: "sudo -u postgres psql -c '\dt' db" i databasmaskinen.
 - name: Skapa tabellen 'messages' i databasen
   community.postgresql.postgresql_query:
     db: "{{ db_name }}"
