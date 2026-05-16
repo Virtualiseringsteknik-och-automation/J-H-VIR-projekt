@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
   WEBSERVER2_IP ="192.168.56.12"
   #WEBSERVER3_IP ="192.168.56.14"
   DATABASE_IP ="192.168.56.13"
+  GITHUB_REPO ="https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git"
   
   #Variabler för VMarnas prestanda
   VM_MEMORY ="2048"
@@ -48,7 +49,7 @@ Vagrant.configure("2") do |config|
       apt-get install -y ansible git
 
       #Klona repot till "/home/vagrant/"
-      git clone https://TofflanSec:#{secrets["GITHUB_TOKEN"]}@github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git /home/vagrant/ansible
+      git clone GITHUB_REPO /home/vagrant/ansible
       chown -R vagrant:vagrant /home/vagrant/ansible
       chmod 755 /home/vagrant/ansible
 
