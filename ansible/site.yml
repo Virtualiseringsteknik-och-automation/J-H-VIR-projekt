@@ -17,7 +17,7 @@
 
 
 # sätter upp webservrarna
-- name: installera nginx och koppla dem till databasen
+- name: installera apache2 och koppla dem till databasen
   hosts: webservers
   become: yes
   roles:
