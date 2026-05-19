@@ -119,12 +119,10 @@ Denna roll ansvarar för att installera, konfigurera och säkra PostgreSQL-datab
 
 **Hårdvarukrav:**
 
-- Minst 8 GB RAM (projektet använder totalt ~2 GB med alla fyra VMs igång (2,5 GB vid körning av web3 också.))
-- Minst 20 GB ledigt diskutrymme
-
-**Secrets-fil:**
-
-Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se avsnittet [Secrets](#secrets).
+- Minst 16 GB RAM (projektet använder totalt ~8 GB med alla fyra VMs igång (10 GB vid körning av web3 också.))
+- Minst 4 CPU-kärnor (Rekommenderat är 6 CP-kärnor)
+- Minst 50 GB ledigt diskutrymme
+Mängden RAM och cpu kan även justeras i "Vagrantfile". Dessa krav är beräknade på 1st Lastbalancerare, 1st Databas och 2st webservrar. Vid uppskalning med fler webservrar ökar kraven. 
 
 
 ## Kom igång
@@ -134,20 +132,17 @@ Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se
 git clone https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git
 cd J-H-VIR-projekt
 
-# 2. Skapa secrets-filen (se avsnittet Secrets nedan)
-
-
-# 3. Starta alla VMs 
+# 2. Starta alla VMs 
 vagrant up
 
-# 4. SSH in på kontrollnoden (db-maskinen)
+# 3. SSH in på kontrollnoden (db-maskinen)
 vagrant ssh db
 
-# 5. Kör playbooken
+# 4. Kör playbooken
 cd ~/ansible/ansible
 ansible-playbook site.yml
 
-# 6. Öppna gästboken i webbläsaren
+# 5. Öppna gästboken i webbläsaren
 # http://localhost:8080/app.py
 ```
 
