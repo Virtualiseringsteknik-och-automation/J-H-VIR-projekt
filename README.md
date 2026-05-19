@@ -339,6 +339,7 @@ för att demonstrera automatisk felhantering i en labbmiljö.
 
 ## Verifiering
 
+Kör scriptet "healt.py" för att kolla databasen och webservrarna.
 Från hostmaskinen
 ```Bash
 #Anslut till någon av webservrarna via vagrant ssh:
@@ -355,4 +356,35 @@ python3 /usr/local/bin/health.py
 Status: HEALTHY
 ```
 
+Kontrollera så att webservrarna svarar på anrop.
+Från hostmaskinen
+```Bash
+#Anslut till Databasen via vagrant ssh
+vagrant ssh db
+
+#Kör följande kommando
+for i in $(seq 1 10); do curl -s http://192.168.56.10 | grep -o 'web[0-9]'; done
+
+#Förväntat output är att få 10st svar från alla aktiva webservrar mellan 0 och 9.
+Web1
+web2
+web2
+web1
+Web1
+web2
+web2
+web1
+Web1
+web2
+```
+
+Läs av fellogg när en webserver inte svarar.
+Från hostmaskinen
+```Bash
+#Anslut till Lastbalanseraren via vagrant ssh
+vagrant ssh lb
+
+#Kör följande kommando
+sudo tail -f /var/log/nginx/error.log
+```
 ## Designval och motivering
