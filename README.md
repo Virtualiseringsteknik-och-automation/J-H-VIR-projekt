@@ -193,12 +193,84 @@ Filen läses av group_vars/all.yml och innehåller lösenord som webbservrarna a
 
 
 ## Säkerhetsåtgärder
+**1. Förberedelse för secretsfilen**
 
+Vagrantfilen kan läsa in secretsfilen via Ruby för att kunna anropa variabler i secretsfilen:
+
+```ruby
+secrets = {}
+File.foreach("secrets.env") do |line|
+  key, value = line.strip.split("=")
+  secrets[key] = value
+end
+```
+Inga secrets finns i filen idag men detta är förberett för framtida användande i samband med härdning. Secretsfilen användes även 
+under utvecklingen av denna miljö då git-repot var privat och användandet av en token var nödvändigt. Git-token fick då bo i secretsfilen.
+
+**2. Direkt åtkomst till webbservrar blockeras**
+
+Apache-konfigurationen begränsar inkommande trafik till enbart
+lastbalansererarens IP-adress via en `<Location>`-regel:
+
+```apache
+<Location />
+    Require ip {{ hostvars['lb']['ansible_host'] }}
+</Location>
+```
+
+Det innebär att det inte går att nå webbservrarnas IP-adresser direkt
+utifrån — all trafik måste passera lastbalanseraren. Det skyddar mot
+att en angripare kringgår lastbalanseraren och når applikationen direkt.
+
+**3. Databasåtkomst begränsad till specifika IP-adresser**
+
+PostgreSQL:s `pg_hba.conf` konfigureras automatiskt av Ansible med en
+post per webbserver, begränsad till exakt deras IP-adress med `/32`:
+host  db  vagrant  192.168.56.11/32  scram-sha-256
+host  db  vagrant  192.168.56.12/32  scram-sha-256
+
+Endast webbservrar registrerade i inventory kan ansluta till databasen.
+En ny VM på nätverket kan inte ansluta utan att läggas till i inventory
+och att playbooken körs om.
+
+**4. Lösenordskryptering med scram-sha-256**
+
+PostgreSQL-autentiseringen använder `scram-sha-256` vilket är den
+starkaste lösenordsbaserade autentiseringsmetoden i PostgreSQL. Det
+innebär att lösenordet aldrig skickas i klartext över nätverket —
+istället utförs en kryptografisk handskakningsprocess.
+
+**5. Skydd mot SQL-injektion**
+
+Gästboksapplikationen använder parametriserade queries i alla
+databasanrop:
+
+```python
+cur.execute('INSERT INTO messages (message) VALUES (%s)', (new_message,))
+```
+
+Användarstyrd input kombineras aldrig direkt med SQL-strängar. Det
+förhindrar att en angripare kan manipulera databasfrågor genom att
+skriva SQL-kod i meddelandefältet.
+
+**6. Databasen saknar port forwarding**
+
+Databasens VM har medvetet ingen port forwarding konfigurerad i
+Vagrantfilen. Det innebär att PostgreSQL (port 5432) inte är nåbar
+från värddatorn eller internet — enbart från det privata nätverket
+`192.168.56.0/24`.
+
+**7. SSH-nyckelbaserad autentisering**
+
+Ansible ansluter till alla VMs med ett ED25519-nyckelpar som genereras
+automatiskt vid bootstrap av db-maskinen. Lösenordsbaserad SSH-inloggning
+används inte. ED25519 är en modern elliptisk kurva-algoritm som anses
+säkrare än det äldre RSA.
+
+---
 
 
 ## Säkerhetsanalys
-
-
 
 ## Verifiering
 
