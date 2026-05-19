@@ -388,3 +388,29 @@ vagrant ssh lb
 sudo tail -f /var/log/nginx/error.log
 ```
 ## Designval och motivering
+
+I detta projekt har vi valt att bygga en automatiserad multi-node-arkitektur för att simulera en produktionslik, säker och skalbar miljö. Texten nedan redovisar de designvalen och motiveringerna bakom projektet.
+
+1. Automatisering och Infrastructure as Code (IaC)
+
+Val: Vagrant för orkestrering av virtuella maskiner och Ansible för konfigurationshantering.
+
+Motivering: Genom att använda en anpassad Vagrantfile kan den virtuella miljön definieras som kod. Ansible har valts för konfigurationshanteringen eftersom det tillåter oss att bygga skalbara och idempotenta playbooks. Det innebär att vi kan köra våra playbooks upprepade gånger och nå samma resultat utan risk för "missar" i konfigurationer. Detta möjliggör då en helt reproducerbar miljö.
+
+2. Multi-node Arkitektur och Segmentering
+
+Val: Uppdelning av applikationer i dedikerade virtuella maskiner för databas, webbservrar och lastbalansering.
+
+Motivering: En multi-node-arkitektur har valts för att efterlikna en modern och realistisk produktionsmiljö. Genom att separera de olika funktionerna uppnår vi bättre isolering och prestanda. Att placera databasen på en egen dedikerad nod ökar även säkerheten genom att hålla känslig data separerad från de publika, utåtriktade delarna av nätverket.
+
+3. Säkerhet och Åtkomstkontroll
+
+Val: Integrerad SSH-nyckelgenerering i Vagrantfilen samt dynamisk hantering av pg_hba.conf och tabellbehörigheter i PostgreSQL.
+
+Motivering: För att noderna ska kunna kommunicera automatiserat utan manuella lösenord har vi konfigurerat en generering av SSH-nycklar direkt i Vagrantfilen för säker kommunikation. På databasnivå tillämpas principen om minsta behörighet. Detta görs genom att hantera pg_hba.conf dynamiskt samt genom att sätta upp specifika tabellbehörigheter anpassade enbart för Python Flask-applikationens behov.
+
+4. Trafikhantering och Lastbalansering
+
+Val: Användning av Nginx för hantering av nätverkstrafik.
+
+Motivering: Genom att implementera Nginx kan vi hantera och fördela den inkommande trafiken till lastbalanseraren på ett strukturerat sätt. Detta designval säkerställer att miljön är förberedd för skalbarhet och hög tillgänglighet, då belastningen kan spridas över de tillgängliga webbservrarna.
