@@ -35,48 +35,7 @@
 | *`web3`* | *Webbserver* | *192.168.56.14* | — | *Exempelwebbserver som visar skalbarheten. Apache + Python, konfigurerras identiskt med web1 och web2*|
 
 ## Mappstruktur
-repo/
-│
-├── ansible/
-│   ├── ansible.cfg          # Ansible-konfiguration (inventory, remote_user, osv)
-│   ├── inventory.ini        # Vilka servrar Ansible hanterar och i vilka grupper
-│   ├── site.yml             # Master playbook — kör alla roller i rätt ordning
-│   ├── secrets_example.yml  # Mall för secrets.yml (inga riktiga värden)
-│   │
-│   ├── vars/
-│   │   └── main.yml         # Delade variabler (IP-adresser, portar, sökvägar)
-│   │
-│   └───roles/
-│         ├── common/           # Driftsätter Flask-applikationen
-│         │     └── main.yml
-│         ├── database/
-│         │     ├──handlers/ 
-│         │     │      └── main.yml 
-│         │     └── tasks/
-│         │            └── main.yml
-│         ├── loadbanancer/
-│         │     ├── handlers
-│         │     │      └── main.yml
-│         │     ├── tasks/
-│         │     │      └── main.yml
-│         │     └── templates
-│         │            └── loadbalancer.conf.j2
-│         └── webserver           # Installerar och konfigurerar nginx som lastbalanserare
-│               ├── tasks/
-│               │      └── main.yml
-│               ├── handlers/
-│               │      └── main.yml
-│               └── templates/
-│                      └── nginx.conf.j2
-│
-├── docs/
-│   ├── Topologi Ansible.jpg
-│   └── Topologi webbapp.jpg
-│
-├── Vagrantfile          # här definieras alla VMar och nätverksinställningar
-├── secrets.yml          # GITIGNORERAD — lösenord och känsliga värden
-├── .gitignore
-└── README.md
+![alt text](<docs/mapp struktur.png>)
 
 
 
