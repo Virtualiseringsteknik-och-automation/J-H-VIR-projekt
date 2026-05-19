@@ -271,6 +271,84 @@ säkrare än det äldre RSA.
 
 
 ## Säkerhetsanalys
+**Brist 1: Databaslösenord i klartext i group_vars**
+
+`db_password` i `group_vars/all.yml` innehåller lösenordet i klartext.
+Den som har tillgång till repot kan läsa det.
+
+*Produktionslösning:* Ansible Vault krypterar känsliga variabler:
+`ansible-vault encrypt_string 'lösenord' --name db_password`
+Lösenordet kan även läggas i "secrets.env" för att inte pushas till git.
+
+*Accepterat i denna miljö eftersom:* Miljön är isolerad
+och lösenordet skyddar en labbdatabas utan känslig data. Bristen är
+dokumenterad i koden med en kommentar.
+
+---
+
+**Brist 2: PostgreSQL lyssnar på alla IP-adresser**
+
+`listen_addresses = '*'` gör att PostgreSQL accepterar anslutningsförsök
+från alla IP-adresser. Åtkomsten begränsas av `pg_hba.conf`, men det
+vore bättre att begränsa `listen_addresses` till enbart det privata
+nätverkets adresser.
+
+*Produktionslösning:*
+listen_addresses = '192.168.56.13'
+
+*Accepterat i denna miljö eftersom:* `pg_hba.conf` nekar alla
+anslutningar som inte kommer från kända IP-adresser, och databasen
+saknar port forwarding vilket gör den inte nåbar utifrån.
+
+---
+
+**Brist 3: Okrypterad intern kommunikation**
+
+Trafiken mellan Nginx och webbservrar (HTTP) samt mellan webbservrar
+och databasen (PostgreSQL utan TLS) är okrypterad. En angripare med
+tillgång till det interna nätverket kan läsa trafiken.
+
+*Produktionslösning:* Konfigurera TLS i Nginx för HTTPS samt aktivera
+SSL i PostgreSQL-anslutningen med certifikat.
+
+*Accepterat i denna miljö eftersom:* Nätverket `192.168.56.0/24` är
+ett isolerat host-only-nätverk i VirtualBox som enbart är tillgängligt
+från värddatorn.
+
+---
+
+**Brist 4: Felsökningsverktyg installerade på alla VMs**
+
+`curl`, `nano` och `htop` är installerade på samtliga VMs via
+common-rollen. I en produktionsmiljö minimerar man antalet installerade
+paket för att minska attackytan — varje installerat program är en
+potentiell sårbarhet.
+
+*Produktionslösning:* Ta bort paketen från common-rollen och installera
+dem enbart vid behov med `ansible-playbook --tags debug`.
+
+*Accepterat i denna miljö eftersom:* Verktygen används aktivt för
+felsökning och verifiering under utvecklingen av projektet.
+
+---
+
+**Brist 5: Passiv health check utan aktiv övervakning**
+
+Nginx:s health check är passiv — den upptäcker fel först när en request
+faktiskt misslyckas (`max_fails=3 fail_timeout=30s`). En server som är
+degraderad men fortfarande svarar långsamt tas inte bort från rotationen.
+
+*Produktionslösning:* Nginx Plus eller HAProxy erbjuder aktiva health
+checks som proaktivt testar servrar i bakgrunden utan att vänta på
+misslyckade requests. Projektet inkluderar ett verifieringsskript 
+(health.py) som manuellt kan köras för att kontrollera databas- och 
+Apache-status på varje webbserver, men detta triggas inte automatiskt av 
+systemet. En fullständig aktiv health check skulle kräva att skriptet 
+anropas kontinuerligt av ett övervakningssystem som Nagios eller via cron.
+
+*Accepterat i denna miljö eftersom:* Nginx Open Source saknar stöd för
+aktiva health checks utan betaltillägg. Den passiva lösningen räcker
+för att demonstrera automatisk felhantering i en labbmiljö.
 
 ## Verifiering
 
