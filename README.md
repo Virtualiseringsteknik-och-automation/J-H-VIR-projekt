@@ -154,7 +154,7 @@ ansible-playbook site.yml
 
 Ny webbserver läggs till i **två filer** på hostmaskinen utan att ändra någon annan konfiguration:
 
-**Vagrantfile** — (Webbservern "web3" finns redan inlagd för proof of concept ta enbart bort hashen "#" för att lägga till den. Det behövs göras på rad 10 och raderna 175 - 205)
+**Vagrantfile** — (Webbservern "web3" finns redan inlagd för proof of concept ta enbart bort hashen "#" för att lägga till den. Det behövs göras på rad 10 och raderna 180 - 210)
 
 **ansible/inventory.ini** — Tag bort hashen "#" på raden för "web3":
 
