@@ -14,7 +14,7 @@
 - [Kom igång](#kom-igång)
 - [Secrets](#secrets)
 - [Säkerhetsåtgärder](#säkerhetsåtgärder)
-- [Säkerhetsanalys](#sökerhetsanalys)
+- [Säkerhetsanalys](#säkerhetsanalys)
 - [Verifiering](#verifiering)
 - [Designval och motivering](#designval-och-motivering)
 
@@ -32,51 +32,10 @@
 | `web1` | Webbserver | 192.168.56.11 | — | Apache + Python, konfigurerad identiskt med web2|
 | `web2` | Webbserver | 192.168.56.12 | — | Apache + Python, konfigurerad identiskt med web1|
 | `db` | Databas + kontrollnod | 192.168.56.13 | — | PostgreSQL-databas samt Ansible-kontrollnod. Ingen port forwarding — ej nåbar utifrån |
-| *`web3`* | *Webbserver* | *192.168.56.14* | — | *Exempelwebbserver som visar skalbarheten. Apache + Python, konfigurerras identiskt med web1 och web2*|
+| *`web3`* | *Webbserver* | *192.168.56.14* | — | *Exempelwebbserver som visar skalbarheten. Apache + Python, konfigureras identiskt med web1 och web2*|
 
 ## Mappstruktur
-repo/
-│
-├── ansible/
-│   ├── ansible.cfg          # Ansible-konfiguration (inventory, remote_user, osv)
-│   ├── inventory.ini        # Vilka servrar Ansible hanterar och i vilka grupper
-│   ├── site.yml             # Master playbook — kör alla roller i rätt ordning
-│   ├── secrets_example.yml  # Mall för secrets.yml (inga riktiga värden)
-│   │
-│   ├── vars/
-│   │   └── main.yml         # Delade variabler (IP-adresser, portar, sökvägar)
-│   │
-│   └───roles/
-│         ├── common/           # Driftsätter Flask-applikationen
-│         │     └── main.yml
-│         ├── database/
-│         │     ├──handlers/ 
-│         │     │      └── main.yml 
-│         │     └── tasks/
-│         │            └── main.yml
-│         ├── loadbanancer/
-│         │     ├── handlers
-│         │     │      └── main.yml
-│         │     ├── tasks/
-│         │     │      └── main.yml
-│         │     └── templates
-│         │            └── loadbalancer.conf.j2
-│         └── webserver           # Installerar och konfigurerar nginx som lastbalanserare
-│               ├── tasks/
-│               │      └── main.yml
-│               ├── handlers/
-│               │      └── main.yml
-│               └── templates/
-│                      └── nginx.conf.j2
-│
-├── docs/
-│   ├── Topologi Ansible.jpg
-│   └── Topologi webbapp.jpg
-│
-├── Vagrantfile          # här definieras alla VMar och nätverksinställningar
-├── secrets.yml          # GITIGNORERAD — lösenord och känsliga värden
-├── .gitignore
-└── README.md
+![alt text](<docs/mapp struktur.png>)
 
 
 
@@ -94,20 +53,22 @@ Konfigurationsfilen innehåller två sektioner. Under `[defaults]` inaktiveras `
 
 ### site.yml
 
-Master playbook som innehåller 4 plays som exekveras i följande ordning: 1. 'common' exekveras på samtliga hostar och ser till att, uppdateringar görs och installerar "bra att ha verktyg", så som curl och htop. 2. 'databasen' som körs emot databas noden. Här installeras och konfigureras PostgreSQL, samt nödvändiga inställningar som säkrar komunikation från och till webbservrarna. 3. 'webserver' riktar sig emot webb noderna och installerar apache2, Flask och relaterade paket. Den kofigurerar även miljön så att apache2 kan exekvera pythonkod samt kopiera in app koden från templates till sin Flask miljö 4. 'loadbalancer' körs sist och installerar nginx som sedan konfigureras till att agera lastbalanserare eftersom att webbservrarna redan är igång så kan nginx direkt börja dirigera trafiken till dom.
+Master playbook som innehåller 4 plays som exekveras i följande ordning: 1. 'common' exekveras på samtliga hostar och ser till att, uppdateringar görs och installerar "bra att ha verktyg", så som curl och htop. 2. 'databasen' som körs mot databasnoden. Här installeras och konfigureras PostgreSQL, samt nödvändiga inställningar som säkrar komunikation från och till webbservrarna. 3. 'webserver' riktar sig mot webbnoderna och installerar apache2, Flask och relaterade paket. Den kofigurerar även miljön så att apache2 kan exekvera pythonkod samt kopiera in appkoden från templates till sin Flask miljö 4. 'loadbalancer' körs sist och installerar nginx som sedan konfigureras till att agera lastbalanserare eftersom att webbservrarna redan är igång så kan nginx direkt börja dirigera trafiken till dom.
 
 ### Rollen common
-Försöker göra en uppdatering om installationen är äldre en 1 timma och ser till att 3 "bra att ha" felsöknings paket är installerade 
+Försöker göra en uppdatering om installationen är äldre en 1 timma och ser till att 3 "bra att ha" felsökningspaket är installerade 
 
 ### Rollen webserver
-Denna roll ansvarar för att driftsätta och konfigurera Flask-applikationen. I denna miljö driftas Flask via Apache2 och mod_wsgi. Rollen Installerar apache2, python3-flask, python3-psycopg2 och modulen libapache2-mod-wsgi-py3 för Python-exekvering. sedan skapar applokationskatalogen /var/www/chatt som inkluderar bland annat undermappar för HTLM med rätt ägenderättigheter för www-data. Rollen utnytjar Ansibles Jinja2 templates för att skicka in miljövariablerdirekt i koden. Som då inkluderar databasuppgifter, WSGI-konfiguration och dynamiska IP-adresser till HTML-bannern. Apaches VirtualHost konfigureras med dedikerade WSGI-processgrupper. Trafik begränsas via en "Require ip regel" som säkerställer att endast lastbalanceraren får ansluta till webbservern.
+
+Denna roll ansvarar för att driftsätta och konfigurera Flask-applikationen. I denna miljö driftas Flask via Apache2 och mod_wsgi. Rollen Installerar apache2, python3-flask, python3-psycopg2 och modulen libapache2-mod-wsgi-py3 för Python-exekvering. sedan skapar applikationskatalogen /var/www/chatt som inkluderar bland annat undermappar för HTLM med rätt ägenderättigheter för www-data. Rollen utnytjar Ansibles Jinja2 templates för att skicka in miljövariabler direkt i koden. Som då inkluderar databasuppgifter, WSGI-konfiguration och dynamiska IP-adresser till HTML-bannern. Apaches VirtualHost konfigureras med dedikerade WSGI-processgrupper. Trafik begränsas via en "Require ip regel" som säkerställer att endast lastbalanceraren får ansluta till webbservern.
+
 
 ### Rollen loadbalancer
 
 Installerar Nginx och renderar `loadbalancer.conf.j2` med ett `upstream`-block som itererar över alla servrar i `[webservers]`. Varje server konfigureras med `max_fails=3 fail_timeout=30s` vilket är Nginx:s passiva health check — om en server inte svarar på tre requests tas den automatiskt bort från rotationen i 30 sekunder. Handlers startar om och laddar om Nginx.
 
 ### Rollen databas
-Denna roll ansvarar för att installera, konfigurera och säkra PostgreSQL-databasen. Till skillnad från en statisk konfiguration är denna roll utformad för att dynamiskt anpassa sig efter den skalbara webbserver-miljön. Här installeras postgresql, postgresql-contrib samt paketen acl och python3-psycopg2 för att Ansible ska kunna hantera rättigheter och kommunicera med databasen. Rollen skapar databasen och en dedikerad applikationsanvändare. Både databasnamn och inloggningsuppgifter hämtas säkert från group_vars. Automatiskt skapas tabellen messages med informations kolumner relevanta till vart och när medelandet kom ifrån och tilldelar applikationsanvändaren nödvändiga rättigheter till tabellen. PostgreSQL konfigureras till att lyssna på nätverket (listen_addresses = '*'). För att uppräthålla en hög säkerhetsnivå och full skalbarhet används en Ansible-loop som kollar över gruppen [webservers] i inventariet. Denna loop lägger dynamiskt in webbservrarnas aktuella IP-adresser i "gästlistan" (pg_hba.conf), vilket innebär att endast aktiva webbservrar tillåts ansluta. All autentisering säkras dessutom med krypteringsmetoden scram-sha-256. Ansible-handlers används för att automatiskt starta om eller ladda om PostgreSQL vid uppdateringar av konfigurationsfilerna.
+Denna roll ansvarar för att installera, konfigurera och säkra PostgreSQL-databasen. Till skillnad från en statisk konfiguration är denna roll utformad för att dynamiskt anpassa sig efter den skalbara webbserver-miljön. Här installeras postgresql, postgresql-contrib samt paketen acl och python3-psycopg2 för att Ansible ska kunna hantera rättigheter och kommunicera med databasen. Rollen skapar databasen och en dedikerad applikationsanvändare. Både databasnamn och inloggningsuppgifter hämtas säkert från group_vars. Automatiskt skapas tabellen messages med informationskolumner relevanta till vart och när meddelandet kom ifrån och tilldelar applikationsanvändaren nödvändiga rättigheter till tabellen. PostgreSQL konfigureras till att lyssna på nätverket (listen_addresses = '*'). För att upprätthålla en hög säkerhetsnivå och full skalbarhet används en Ansible-loop som kollar över gruppen [webservers] i inventariet. Denna loop lägger dynamiskt in webbservrarnas aktuella IP-adresser i "gästlistan" (pg_hba.conf), vilket innebär att endast aktiva webbservrar tillåts ansluta. All autentisering säkras dessutom med krypteringsmetoden scram-sha-256. Ansible-handlers används för att automatiskt starta om eller ladda om PostgreSQL vid uppdateringar av konfigurationsfilerna.
 
 ## Krav och förutsättningar
 
@@ -119,12 +80,10 @@ Denna roll ansvarar för att installera, konfigurera och säkra PostgreSQL-datab
 
 **Hårdvarukrav:**
 
-- Minst 8 GB RAM (projektet använder totalt ~2 GB med alla fyra VMs igång (2,5 GB vid körning av web3 också.))
-- Minst 20 GB ledigt diskutrymme
-
-**Secrets-fil:**
-
-Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se avsnittet [Secrets](#secrets).
+- Minst 16 GB RAM (projektet använder totalt ~8 GB med alla fyra VMs igång (10 GB vid körning av web3 också.))
+- Minst 4 CPU-kärnor (Rekommenderat är 6 CP-kärnor)
+- Minst 50 GB ledigt diskutrymme
+Mängden RAM och cpu kan även justeras i "Vagrantfile". Dessa krav är beräknade på 1st Lastbalancerare, 1st Databas och 2st webservrar. Vid uppskalning med fler webservrar ökar kraven. 
 
 
 ## Kom igång
@@ -134,32 +93,29 @@ Skapa filen `secrets.env` i projektets rotkatalog innan du kör `vagrant up`. Se
 git clone https://github.com/Virtualiseringsteknik-och-automation/J-H-VIR-projekt.git
 cd J-H-VIR-projekt
 
-# 2. Skapa secrets-filen (se avsnittet Secrets nedan)
-
-
-# 3. Starta alla VMs 
+# 2. Starta alla VMs 
 vagrant up
 
-# 4. SSH in på kontrollnoden (db-maskinen)
+# 3. SSH in på kontrollnoden (db-maskinen)
 vagrant ssh db
 
-# 5. Kör playbooken
+# 4. Kör playbooken
 cd ~/ansible/ansible
 ansible-playbook site.yml
 
-# 6. Öppna gästboken i webbläsaren
-# http://localhost:8080/app.py
+# 5. Öppna gästboken i webbläsaren
+# http://localhost:8080/
 ```
 
 **Förväntat slutresultat:**
 
-Öppna `http://localhost:8080/app.py` i webbläsaren. Du ska se gästboken med ett formulär. Skriv ett inlägg — det sparas i databasen och syns direkt. Bannern längst ned i webbläsarfönstret visar vilken webbserver (`web1` eller `web2`) som svarade på requesten.
+Öppna `http://localhost:8080/` i webbläsaren. Du ska se gästboken med ett formulär. Skriv ett inlägg — det sparas i databasen och syns direkt. Bannern längst ned i webbläsarfönstret visar vilken webbserver (`web1` eller `web2`) som svarade på requesten.
 
 ### Lägga till en ny webbserver
 
 Ny webbserver läggs till i **två filer** på hostmaskinen utan att ändra någon annan konfiguration:
 
-**Vagrantfile** — (Webbservern "web3" finns redan inlagd för proof of concept ta enbart bort hashen "#" för att lägga till den. Det behövs göras på rad 10 och raderna 175 - 205)
+**Vagrantfile** — (Webbservern "web3" finns redan inlagd för proof of concept ta enbart bort hashen "#" för att lägga till den. Det behövs göras på rad 10 och raderna 180 - 210)
 
 **ansible/inventory.ini** — Tag bort hashen "#" på raden för "web3":
 
@@ -179,29 +135,244 @@ ansible-playbook site.yml
 
 ## Secrets
 
-Filen `secrets.env` måste skapas lokalt och **ska aldrig committas till Git** (den finns i `.gitignore`).
-
-Skapa filen i projektets rotkatalog med följande innehåll:
-
-```
-export DB_PASSWORD="DITT_LÖSENORD_HÄR"
-```
-
-Filen läses av group_vars/all.yml och innehåller lösenord som webbservrarna använder för att kunna prata med databasen.
+Filen `secrets.env` behöver inte skapas då ingenting anropas därifrån i denna version.
 
 ---
 
 
 ## Säkerhetsåtgärder
+**1. Förberedelse för secretsfilen**
 
+Vagrantfilen kan läsa in secretsfilen via Ruby för att kunna anropa variabler i secretsfilen:
+
+```ruby
+secrets = {}
+File.foreach("secrets.env") do |line|
+  key, value = line.strip.split("=")
+  secrets[key] = value
+end
+```
+Inga secrets finns i filen idag men detta är förberett för framtida användande i samband med härdning. Secretsfilen användes även 
+under utvecklingen av denna miljö då git-repot var privat och användandet av en token var nödvändigt. Git-token fick då bo i secretsfilen.
+
+**2. Direkt åtkomst till webbservrar blockeras**
+
+Apache-konfigurationen begränsar inkommande trafik till enbart
+lastbalanserarens IP-adress via en `<Location>`-regel:
+
+```apache
+<Location />
+    Require ip {{ hostvars['lb']['ansible_host'] }}
+</Location>
+```
+
+Det innebär att det inte går att nå webbservrarnas IP-adresser direkt
+utifrån — all trafik måste passera lastbalanseraren. Det skyddar mot
+att en angripare kringgår lastbalanseraren och når applikationen direkt.
+
+**3. Databasåtkomst begränsad till specifika IP-adresser**
+
+PostgreSQL:s `pg_hba.conf` konfigureras automatiskt av Ansible med en
+post per webbserver, begränsad till exakt deras IP-adress med `/32`:
+```
+host  db  vagrant  192.168.56.11/32  scram-sha-256
+host  db  vagrant  192.168.56.12/32  scram-sha-256
+```
+Endast webbservrar registrerade i inventory kan ansluta till databasen.
+En ny VM på nätverket kan inte ansluta utan att läggas till i inventory
+och att playbooken körs om.
+
+**4. Lösenordskryptering med scram-sha-256**
+
+PostgreSQL-autentiseringen använder `scram-sha-256` vilket är den
+starkaste lösenordsbaserade autentiseringsmetoden i PostgreSQL. Det
+innebär att lösenordet aldrig skickas i klartext över nätverket —
+istället utförs en kryptografisk handskakningsprocess.
+
+**5. Skydd mot SQL-injektion**
+
+Gästboksapplikationen använder parametriserade queries i alla
+databasanrop:
+
+```python
+cur.execute('INSERT INTO messages (message) VALUES (%s)', (new_message,))
+```
+
+Användarstyrd input kombineras aldrig direkt med SQL-strängar. Det
+förhindrar att en angripare kan manipulera databasfrågor genom att
+skriva SQL-kod i meddelandefältet.
+
+**6. Databasen saknar port forwarding**
+
+Databasens VM har medvetet ingen port forwarding konfigurerad i
+Vagrantfilen. Det innebär att PostgreSQL (port 5432) inte är nåbar
+från värddatorn eller internet — enbart från det privata nätverket
+`192.168.56.0/24`.
+
+**7. SSH-nyckelbaserad autentisering**
+
+Ansible ansluter till alla VMs med ett ED25519-nyckelpar som genereras
+automatiskt vid bootstrap av db-maskinen. Lösenordsbaserad SSH-inloggning
+används inte. ED25519 är en modern elliptisk kurva-algoritm som anses
+säkrare än det äldre RSA.
+
+---
 
 
 ## Säkerhetsanalys
+**Brist 1: Databaslösenord i klartext i group_vars**
 
+`db_password` i `group_vars/all.yml` innehåller lösenordet i klartext.
+Den som har tillgång till repot kan läsa det.
 
+*Produktionslösning:* Ansible Vault krypterar känsliga variabler:
+`ansible-vault encrypt_string 'lösenord' --name db_password`
+Lösenordet kan även läggas i "secrets.env" för att inte pushas till git.
+
+*Accepterat i denna miljö eftersom:* Miljön är isolerad
+och lösenordet skyddar en labbdatabas utan känslig data. Bristen är
+dokumenterad i koden med en kommentar.
+
+---
+
+**Brist 2: PostgreSQL lyssnar på alla IP-adresser**
+
+`listen_addresses = '*'` gör att PostgreSQL accepterar anslutningsförsök
+från alla IP-adresser. Åtkomsten begränsas av `pg_hba.conf`, men det
+vore bättre att begränsa `listen_addresses` till enbart det privata
+nätverkets adresser.
+
+*Produktionslösning:*
+listen_addresses = '192.168.56.13'
+
+*Accepterat i denna miljö eftersom:* `pg_hba.conf` nekar alla
+anslutningar som inte kommer från kända IP-adresser, och databasen
+saknar port forwarding vilket gör den inte nåbar utifrån.
+
+---
+
+**Brist 3: Okrypterad intern kommunikation**
+
+Trafiken mellan Nginx och webbservrar (HTTP) samt mellan webbservrar
+och databasen (PostgreSQL utan TLS) är okrypterad. En angripare med
+tillgång till det interna nätverket kan läsa trafiken.
+
+*Produktionslösning:* Konfigurera TLS i Nginx för HTTPS samt aktivera
+SSL i PostgreSQL-anslutningen med certifikat.
+
+*Accepterat i denna miljö eftersom:* Nätverket `192.168.56.0/24` är
+ett isolerat host-only-nätverk i VirtualBox som enbart är tillgängligt
+från värddatorn.
+
+---
+
+**Brist 4: Felsökningsverktyg installerade på alla VMs**
+
+`curl`, `nano` och `htop` är installerade på samtliga VMs via
+common-rollen. I en produktionsmiljö minimerar man antalet installerade
+paket för att minska attackytan — varje installerat program är en
+potentiell sårbarhet.
+
+*Produktionslösning:* Ta bort paketen från common-rollen och installera
+dem enbart vid behov med `ansible-playbook --tags debug`.
+
+*Accepterat i denna miljö eftersom:* Verktygen används aktivt för
+felsökning och verifiering under utvecklingen av projektet.
+
+---
+
+**Brist 5: Passiv health check utan aktiv övervakning**
+
+Nginx:s health check är passiv — den upptäcker fel först när en request
+faktiskt misslyckas (`max_fails=3 fail_timeout=30s`). En server som är
+degraderad men fortfarande svarar långsamt tas inte bort från rotationen.
+
+*Produktionslösning:* Nginx Plus eller HAProxy erbjuder aktiva health
+checks som proaktivt testar servrar i bakgrunden utan att vänta på
+misslyckade requests. Projektet inkluderar ett verifieringsskript 
+(health.py) som manuellt kan köras för att kontrollera databas- och 
+Apache-status på varje webbserver, men detta triggas inte automatiskt av 
+systemet. En fullständig aktiv health check skulle kräva att skriptet 
+anropas kontinuerligt av ett övervakningssystem som Nagios eller via cron.
+
+*Accepterat i denna miljö eftersom:* Nginx Open Source saknar stöd för
+aktiva health checks utan betaltillägg. Den passiva lösningen räcker
+för att demonstrera automatisk felhantering i en labbmiljö.
 
 ## Verifiering
 
+Kör scriptet "health.py" för att kolla databasen och webservrarna.
+Från hostmaskinen
+```Bash
+#Anslut till någon av webservrarna via vagrant ssh:
+vagrant ssh web1
 
+#Kör följande kommando:
+python3 /usr/local/bin/health.py
 
+#Nu körs en health check för att kontrollera anslutningen från webservern till både lastbalanseraren och databasen. Förväntad output är:
+--- Health Check för Webbserver ---
+[ + ] Databasanslutning: OK
+[ + ] Apache2-tjänst: OK (Körs)
+-----------------------------------
+Status: HEALTHY
+```
+
+Kontrollera så att webservrarna svarar på anrop.
+Från hostmaskinen
+```Bash
+#Anslut till Databasen via vagrant ssh
+vagrant ssh db
+
+#Kör följande kommando
+for i in $(seq 1 10); do curl -s http://192.168.56.10 | grep -o 'web[0-9]'; done
+
+#Förväntat output är att få 10st svar från alla aktiva webservrar mellan 0 och 9.
+Web1
+Web2
+Web2
+Web1
+Web1
+Web2
+Web2
+Web1
+Web1
+Web2
+```
+
+Läs av fellogg när en webserver inte svarar.
+Från hostmaskinen
+```Bash
+#Anslut till Lastbalanseraren via vagrant ssh
+vagrant ssh lb
+
+#Kör följande kommando
+sudo tail -f /var/log/nginx/error.log
+```
 ## Designval och motivering
+
+I detta projekt har vi valt att bygga en automatiserad multi-node-arkitektur för att simulera en produktionslik, säker och skalbar miljö. Texten nedan redovisar de designvalen och motiveringerna bakom projektet.
+
+1. Automatisering och Infrastructure as Code (IaC)
+
+Val: Vagrant för orkestrering av virtuella maskiner och Ansible för konfigurationshantering.
+
+Motivering: Genom att använda en anpassad Vagrantfile kan den virtuella miljön definieras som kod. Ansible har valts för konfigurationshanteringen eftersom det tillåter oss att bygga skalbara och idempotenta playbooks. Det innebär att vi kan köra våra playbooks upprepade gånger och nå samma resultat utan risk för "missar" i konfigurationer. Detta möjliggör då en helt reproducerbar miljö.
+
+2. Multi-node Arkitektur och Segmentering
+
+Val: Uppdelning av applikationer i dedikerade virtuella maskiner för databas, webbservrar och lastbalansering.
+
+Motivering: En multi-node-arkitektur har valts för att efterlikna en modern och realistisk produktionsmiljö. Genom att separera de olika funktionerna uppnår vi bättre isolering och prestanda. Att placera databasen på en egen dedikerad nod ökar även säkerheten genom att hålla känslig data separerad från de publika, utåtriktade delarna av nätverket.
+
+3. Säkerhet och Åtkomstkontroll
+
+Val: Integrerad SSH-nyckelgenerering i Vagrantfilen samt dynamisk hantering av pg_hba.conf och tabellbehörigheter i PostgreSQL.
+
+Motivering: För att noderna ska kunna kommunicera automatiserat utan manuella lösenord har vi konfigurerat en generering av SSH-nycklar direkt i Vagrantfilen för säker kommunikation. På databasnivå tillämpas principen om minsta behörighet. Detta görs genom att hantera pg_hba.conf dynamiskt samt genom att sätta upp specifika tabellbehörigheter anpassade enbart för Python Flask-applikationens behov.
+
+4. Trafikhantering och Lastbalansering
+
+Val: Användning av Nginx för hantering av nätverkstrafik.
+
+Motivering: Genom att implementera Nginx kan vi hantera och fördela den inkommande trafiken till lastbalanseraren på ett strukturerat sätt. Detta designval säkerställer att miljön är förberedd för skalbarhet och hög tillgänglighet, då belastningen kan spridas över de tillgängliga webbservrarna.
