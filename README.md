@@ -14,7 +14,7 @@
 - [Kom igång](#kom-igång)
 - [Secrets](#secrets)
 - [Säkerhetsåtgärder](#säkerhetsåtgärder)
-- [Säkerhetsanalys](#sökerhetsanalys)
+- [Säkerhetsanalys](#säkerhetsanalys)
 - [Verifiering](#verifiering)
 - [Designval och motivering](#designval-och-motivering)
 
@@ -102,12 +102,12 @@ cd ~/ansible/ansible
 ansible-playbook site.yml
 
 # 5. Öppna gästboken i webbläsaren
-# http://localhost:8080/app.py
+# http://localhost:8080/
 ```
 
 **Förväntat slutresultat:**
 
-Öppna `http://localhost:8080/app.py` i webbläsaren. Du ska se gästboken med ett formulär. Skriv ett inlägg — det sparas i databasen och syns direkt. Bannern längst ned i webbläsarfönstret visar vilken webbserver (`web1` eller `web2`) som svarade på requesten.
+Öppna `http://localhost:8080/` i webbläsaren. Du ska se gästboken med ett formulär. Skriv ett inlägg — det sparas i databasen och syns direkt. Bannern längst ned i webbläsarfönstret visar vilken webbserver (`web1` eller `web2`) som svarade på requesten.
 
 ### Lägga till en ny webbserver
 
@@ -172,9 +172,10 @@ att en angripare kringgår lastbalanseraren och når applikationen direkt.
 
 PostgreSQL:s `pg_hba.conf` konfigureras automatiskt av Ansible med en
 post per webbserver, begränsad till exakt deras IP-adress med `/32`:
+```
 host  db  vagrant  192.168.56.11/32  scram-sha-256
 host  db  vagrant  192.168.56.12/32  scram-sha-256
-
+```
 Endast webbservrar registrerade i inventory kan ansluta till databasen.
 En ny VM på nätverket kan inte ansluta utan att läggas till i inventory
 och att playbooken körs om.
@@ -326,15 +327,15 @@ for i in $(seq 1 10); do curl -s http://192.168.56.10 | grep -o 'web[0-9]'; done
 
 #Förväntat output är att få 10st svar från alla aktiva webservrar mellan 0 och 9.
 Web1
-web2
-web2
-web1
+Web2
+Web2
 Web1
-web2
-web2
-web1
 Web1
-web2
+Web2
+Web2
+Web1
+Web1
+Web2
 ```
 
 Läs av fellogg när en webserver inte svarar.
